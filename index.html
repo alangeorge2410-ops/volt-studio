@@ -1,0 +1,2893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CutLoom | Free Online Video Editor</title>
+<meta name="google-site-verification" content="Yi4iLj8gxwR6SQ_o5vDQuqZRBhh_JKLtNvBs66UwPU8" />
+
+<!-- Meta tags for Google Search & SEO -->
+<meta name="description" content="CutLoom is a free, powerful in-browser video editor with WebGL filters, keyframe animation, chroma key green screen, and AI background removal.">
+<meta name="keywords" content="CutLoom, CutLoom Video Editor, browser video editor, online video editor">
+<meta name="author" content="CutLoom">
+<style>
+    /* LANDING PAGE STYLES */
+#home-landing-page {
+position: fixed;
+top: 0;
+left: 0;
+width: 100vw;
+height: 100vh;
+background: radial-gradient(circle at center, #111118 0%, #000000 100%);
+z-index: 99999;
+display: flex;
+align-items: center;
+justify-content: center;
+text-align: center;
+color: #ffffff;
+cursor: pointer;
+transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+#home-landing-page.hidden-landing {
+opacity: 0;
+visibility: hidden;
+pointer-events: none;
+}
+
+.landing-content {
+max-width: 600px;
+padding: 40px;
+background: rgba(255, 255, 255, 0.03);
+border: 1px solid rgba(255, 255, 255, 0.1);
+border-radius: 16px;
+backdrop-filter: blur(10px);
+}
+
+.landing-title {
+font-size: 3rem;
+font-weight: 800;
+letter-spacing: 2px;
+margin-bottom: 8px;
+color: #ffbc00;
+}
+
+.landing-subtitle {
+font-size: 1.1rem;
+color: #a0a0a0;
+margin-bottom: 24px;
+}
+
+.landing-features {
+display: flex;
+justify-content: center;
+gap: 16px;
+flex-wrap: wrap;
+font-size: 0.85rem;
+color: #cccccc;
+margin-bottom: 32px;
+}
+
+.btn-launch-studio {
+background: #ffbc00;
+color: #000000;
+border: none;
+padding: 14px 32px;
+font-size: 1rem;
+font-weight: 700;
+border-radius: 8px;
+cursor: pointer;
+transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.btn-launch-studio:hover {
+background: #ffd043;
+transform: scale(1.04);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+body { background-color: #000000; color: #ffffff; height: 100vh; width: 100vw; overflow: hidden; display: flex; }
+.app-view-container { width: 100vw; height: 100vh; display: grid; grid-template-columns: 1fr 270px; background: #000000; overflow: hidden; }
+
+/* PRODUCTION STUDIO WORKSPACE */
+.left-production-column { display: grid; grid-template-rows: auto 1fr auto 215px; overflow: hidden; height: 100vh; border-right: 1px solid #14141a; position: relative; }
+.top-utility-deck { background: #050507; border-bottom: 1px solid #14141a; height: 38px; display: flex; align-items: center; padding: 0 12px; justify-content: space-between; }
+
+/* TIMELINE CONTROLS HEADER BAR */
+.timeline-controls-header-bar { background: #09090d; border-top: 1px solid #14141a; border-bottom: 1px solid #14141a; height: 36px; display: flex; align-items: center; padding: 0 16px; justify-content: space-between; }
+.timeline-zoom-container { display: flex; align-items: center; gap: 8px; font-size: 10px; color: #8e8e93; font-weight: bold; text-transform: uppercase; }
+.timeline-zoom-slider { width: 140px; accent-color: #ffbc00; cursor: pointer; }
+
+/* MONITOR VIEWPORT */
+.monitor-stage-viewport { background: #020203; display: grid; place-items: center; overflow: hidden; position: relative; height: 100%; width: 100%; }
+.canvas-frame-container { width: 100%; height: 95%; display: flex; align-items: center; justify-content: center; position: relative; background: #040406; overflow: hidden; border: 2px solid #22222a; }
+#productionRenderCanvas { background: #000000; box-shadow: 0 0 30px rgba(0,0,0,0.8); max-width: 100%; max-height: 100%; object-fit: contain; }
+
+/* PLAYBACK CONTROL DECK */
+.playback-control-deck { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 520px; background: rgba(14, 14, 18, 0.9); backdrop-filter: blur(10px); padding: 4px 16px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); height: 32px; z-index: 10; }
+.timer-label { font-family: monospace; font-size: 11px; color: #858599; }
+.center-controls { display: flex; align-items: center; gap: 20px; }
+.control-node { background: transparent; border: none; color: #ffffff; cursor: pointer; display: flex; align-items: center; font-size: 12px; font-weight: 600; }
+.control-node.active-slowmo { color: #ffbc00 !important; text-shadow: 0 0 8px rgba(255,188,0,0.4); }
+
+/* TIMELINE CONTAINER PANELS */
+.timeline-deck-panel { background: #050508; padding: 12px 12px 0 12px; display: flex; flex-direction: column; gap: 6px; height: 100%; overflow-y: auto; position: relative; }
+.timeline-row-lane { display: flex; align-items: center; background: #09090d; border-radius: 4px; height: 48px; padding: 0 12px; border: 1px solid #111116; position: relative; }
+
+.track-descriptor { width: 140px; display: flex; align-items: center; justify-content: space-between; gap: 4px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; color: #72728c; border-right: 1px solid #14141a; height: 100%; flex-shrink: 0; user-select: none; padding-right: 8px; background: #09090d; z-index: 5; }
+.btn-append-track-node { background: #1c1c28; border: 1px solid #333344; color: #52ff7c; width: 20px; height: 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.1s; }
+.track-content-flow-lane { flex-grow: 1; padding-left: 0px; display: flex; align-items: center; height: 100%; position: relative; background: #06060a; overflow: hidden; cursor: pointer; }
+
+/* SCROLL BARS */
+.mini-scrubber-progress-track { width: 100%; height: 4px; background: #14141f; position: relative; border-radius: 2px; }
+.mini-scrubber-fill-bar { height: 100%; width: 0%; background: #007aff; border-radius: 2px; }
+.clean-seconds-ticks-wrapper { width: 100%; height: 12px; position: relative; display: flex; align-items: flex-start; overflow: hidden; margin-top: -2px; }
+.seconds-tick-node { position: absolute; height: 5px; width: 1px; background: rgba(255, 255, 255, 0.25); transform: translateX(-50%); }
+.seconds-tick-node.major-second-mark { height: 9px; background: rgba(255, 255, 255, 0.45); }
+.seconds-tick-label { position: absolute; top: 10px; font-size: 7.5px; font-family: monospace; color: #6d6d80; transform: translateX(-50%); white-space: nowrap; }
+
+/* DRAGGABLE TRACK BLOCKS */
+.timeline-clip-container-wrapper { width: 100%; height: 100%; position: relative; display: flex; align-items: center; pointer-events: none; }
+.timeline-clip-track-block { position: absolute; height: 42px; background: #1e1e2f; border: 1px solid #4e4e6c; border-radius: 4px; display: flex; flex-direction: column; justify-content: space-between; color: #52ff7c; font-size: 8.5px; font-weight: 700; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.4); cursor: pointer; user-select: none; pointer-events: auto; z-index: 10; }
+.timeline-clip-track-block.selected-clip { border: 2px solid #ffbc00 !important; box-shadow: 0 0 10px rgba(255,188,0,0.5); }
+.clip-label-overlay-text { position: absolute; top: 2px; left: 6px; z-index: 5; background: rgba(0, 0, 0, 0.65); padding: 1px 4px; border-radius: 2px; color: #ffffff; text-shadow: 1px 1px 2px #000; max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.clip-waveform-canvas { position: absolute; bottom: 1px; left: 0; width: 100%; height: 16px; opacity: 0.6; pointer-events: none; }
+.clip-filmstrip-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; pointer-events: none; overflow: hidden; z-index: 1; }
+.filmstrip-frame-tile { height: 100%; flex-shrink: 0; border-right: 1px solid rgba(0, 0, 0, 0.3); background-size: cover; background-position: center; background-repeat: no-repeat; background-color: #111116; }
+
+/* PLAYHEAD INDICATORS */
+#playheadOverlayContainer { position: absolute; left: 152px; right: 12px; top: 0; bottom: 42px; pointer-events: none; z-index: 100; overflow: hidden; }
+.timeline-playhead-line { position: absolute; top: 0; bottom: 0; width: 2px; background-color: #ffffff; box-shadow: 0 0 4px rgba(0,0,0,0.8); left: 0%; pointer-events: none; }
+.timeline-hover-skimming-line { position: absolute; top: 0; bottom: 0; width: 2px; background-color: #ffbc00; box-shadow: 0 0 6px rgba(255, 188, 0, 0.8); left: 0%; pointer-events: none; display: none; z-index: 99; }
+
+/* MULTI-PURPOSE CONTEXT SCREEN */
+.multi-purpose-contextual-screen { background: #0c0c12; border-top: 2px solid #ffbc00; padding: 14px 24px; display: none; flex-direction: column; align-items: center; position: relative; width: 100%; height: 140px; margin-top: 4px; border-radius: 4px; }
+.context-view-section { display: none; width: 100%; flex-direction: column; align-items: center; height: 100%; }
+.context-view-section.active-context { display: flex; }
+
+.trim-meta-header { display: flex; justify-content: space-between; align-items: center; width: 100%; font-size: 11px; color: #8e8e93; font-weight: 600; margin-bottom: 4px; }
+.trim-filmstrip-track-wrapper { position: relative; width: 100%; height: 54px; background: #07070a; border: 1px solid #1a1a26; margin: 4px 0; border-radius: 4px; pointer-events: auto; }
+.trim-interactive-slider-range { position: absolute; top: 0; bottom: 0; background: rgba(255, 188, 0, 0.15); border-top: 2px solid #ffbc00; border-bottom: 2px solid #ffbc00; cursor: grab; }
+.trim-slider-handle { position: absolute; width: 18px; height: 100%; top: 0; background: #ffbc00; cursor: ew-resize; display: flex; align-items: center; justify-content: center; color: #000000; font-size: 10px; font-weight: 900; user-select: none; z-index: 15; pointer-events: auto; border-radius: 2px; }
+.trim-manual-numeric-input-box { background: #14141f; border: 1px solid #33334d; border-radius: 4px; color: #ffbc00; width: 85px; height: 22px; font-family: monospace; font-size: 11px; text-align: center; outline: none; margin-left: 6px; }
+
+.trim-interval-row-deck, .preset-chips-row-deck { display: flex; gap: 8px; margin: 4px 0; align-items: center; max-width: 100%; overflow-x: auto; padding-bottom: 4px; }
+.btn-interval-node, .btn-preset-chip { background: #1c1c24; border: 1px solid #2c2c36; color: #d1d1d6; padding: 4px 14px; border-radius: 14px; font-size: 10px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+.btn-interval-node.active-interval, .btn-preset-chip.active-chip { background: #ffbc00; color: #000000; border-color: #ffbc00; }
+
+/* FILTER SIDEBAR PANEL */
+.filter-matrix-browser-container { display: grid; grid-template-columns: 110px 1fr; width: 100%; height: 90px; gap: 12px; margin-top: 4px; overflow: hidden; }
+.filter-category-menu-sidebar { display: flex; flex-direction: column; gap: 4px; overflow-y: auto; border-right: 1px solid #1a1a26; padding-right: 6px; }
+.btn-filter-category-selector { background: #111116; border: 1px solid #22222d; color: #8e8e93; font-size: 9px; padding: 4px; border-radius: 4px; text-align: left; cursor: pointer; font-weight: bold; text-transform: uppercase; }
+.btn-filter-category-selector.active-category-tab { background: #ffbc00; color: #000000; border-color: #ffbc00; }
+.filter-chips-scroll-lane { display: flex; gap: 6px; align-items: center; overflow-x: auto; width: 100%; height: 100%; padding-bottom: 4px; }
+
+/* LABELED BUTTON TABS */
+.context-actions-footer { display: flex; gap: 16px; margin-top: auto; align-items: center; width: auto; z-index: 20; }
+.btn-classy-action-node { background: #121217; border: 1px solid #23232e; border-radius: 6px; height: 28px; padding: 0 18px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease; }
+.btn-classy-cancel { color: #ff453a; box-shadow: 0 0 10px rgba(255, 69, 58, 0.05); }
+.btn-classy-cancel:hover { background: #261515; border-color: #ff453a; box-shadow: 0 0 15px rgba(255, 69, 58, 0.2); }
+.btn-classy-confirm { color: #30d158; box-shadow: 0 0 10px rgba(48, 209, 88, 0.05); }
+.btn-classy-confirm:hover { background: #132418; border-color: #30d158; box-shadow: 0 0 15px rgba(48, 209, 88, 0.2); }
+
+/* SIDEBAR INSPECTOR */
+.inspector-control-sidebar { background: #050508 !important; padding: 12px 14px !important; display: flex !important; flex-direction: column !important; gap: 12px !important; overflow-y: auto !important; height: 100% !important; width: 270px !important; min-width: 270px !important; flex-shrink: 0 !important; }
+.inspector-section-title { font-size: 8px; text-transform: uppercase; letter-spacing: 0.5px; color: #414152; font-weight: 700; border-bottom: 1px solid #111116; padding-bottom: 3px; }
+.inspector-grid-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px 4px; width: 100%; }
+.icon-btn-container { position: relative; display: flex; flex-direction: column; align-items: center; width: 100%; }
+
+.btn-icon-only { background: #0a0a0f; border: 1px solid #1c1c28; color: #8c8ca8; width: 100%; height: 34px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13.5px; transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease, transform 0.1s ease, box-shadow 0.18s ease; }
+.btn-icon-only:active { transform: scale(0.95); }
+.btn-icon-only:hover { border-color: rgba(255,188,0,0.45); color: #f3e6c8; background: #101017; box-shadow: 0 0 10px rgba(255,188,0,0.08); }
+.btn-icon-only.active-tool { border-color: #ffbc00 !important; color: #ffbc00 !important; background: rgba(255,188,0,0.1) !important; box-shadow: 0 0 12px rgba(255,188,0,0.25) inset; }
+.icon-sub-label { font-size: 7.5px; color: #6d6d80; text-transform: uppercase; font-weight: 600; margin-top: 3px; text-align: center; }
+
+.slider-control-row { display: flex; flex-direction: column; gap: 4px; font-size: 7.5px; color: #6d6d80; text-transform: uppercase; }
+.slider-element { width: 100%; accent-color: #ffffff; background: #14141c; height: 3px; cursor: pointer; }
+
+.management-action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 4px; }
+.btn-mgmt-action { height: 28px; font-size: 8px; font-weight: 700; text-transform: uppercase; border-radius: 3px; cursor: pointer; border: 1px solid transparent; display: flex; align-items: center; justify-content: center; gap: 4px; }
+.btn-mgmt-delete { background: #261212; border-color: #441a1a; color: #ff5252; }
+.btn-mgmt-save { background: #122417; border-color: #1a4023; color: #52ff7c; }
+
+.hidden-file-input { display: none !important; }
+.toast-feedback { position: absolute; bottom: 20px; left: 20px; background: #007aff; color: white; padding: 10px 20px; border-radius: 5px; opacity: 0; transition: opacity 0.3s; z-index: 999; }
+
+/* TRANSFORM + KEYFRAME PANEL */
+.xform-row { display: flex; align-items: center; gap: 6px; font-size: 8.5px; color: #6d6d80; text-transform: uppercase; font-weight: 700; }
+.xform-label { width: 46px; flex-shrink: 0; }
+.xform-input { background: #14141f; border: 1px solid #2a2a3a; color: #ffbc00; font-family: monospace; font-size: 10px; width: 56px; height: 22px; border-radius: 3px; text-align: center; outline: none; }
+.xform-input:focus { border-color: #ffbc00; }
+.btn-keyframe-diamond { width: 20px; height: 20px; background: #14141f; border: 1px solid #333344; border-radius: 3px; cursor: pointer; color: #52ff7c; font-size: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.btn-keyframe-diamond.has-keyframes { background: #1a3320; border-color: #52ff7c; }
+.btn-keyframe-diamond.on-keyframe { background: #52ff7c; color: #000; }
+.xform-nav-btn { width: 18px; height: 20px; background: transparent; border: none; color: #52728c; cursor: pointer; font-size: 10px; }
+.select-dropdown { background: #14141f; border: 1px solid #2a2a3a; color: #d1d1d6; font-size: 9.5px; height: 24px; border-radius: 3px; width: 100%; padding: 0 4px; text-transform: uppercase; font-weight: 600; }
+.mini-note { font-size: 7.5px; color: #52728c; line-height: 1.4; margin-top: 2px; }
+.ai-status-line { font-size: 8px; color: #ffbc00; min-height: 12px; }
+input[type="color"].xform-color { width: 28px; height: 22px; padding: 0; border: 1px solid #2a2a3a; border-radius: 3px; background: #14141f; cursor: pointer; }
+
+/* INSPECTOR TAB BAR -- only the active tab's panel is shown, keeping the
+sidebar from being a permanent wall of every control at once. */
+.inspector-tab-bar { display: flex; gap: 4px; padding-bottom: 8px; border-bottom: 1px solid #14141a; margin-bottom: 2px; }
+.inspector-tab-btn { flex: 1; background: transparent; border: 1px solid transparent; color: #5c5c78; height: 32px; border-radius: 5px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease; }
+.inspector-tab-btn:hover { color: #d8d8e6; background: #101017; }
+.inspector-tab-btn.active-inspector-tab { color: #ffbc00; background: rgba(255,188,0,0.08); border-color: rgba(255,188,0,0.35); }
+.inspector-tab-panel { display: flex; flex-direction: column; gap: 12px; }
+
+/* KEYFRAME MARKERS ON TIMELINE CLIP BLOCKS */
+.clip-keyframe-marker { position: absolute; top: 2px; width: 8px; height: 8px; background: #ffbc00; border: 1px solid #1a1200; transform: translateX(-50%) rotate(45deg); z-index: 6; cursor: pointer; box-shadow: 0 0 3px rgba(255,188,0,0.8); }
+.clip-keyframe-marker.on-playhead { background: #52ff7c; box-shadow: 0 0 5px rgba(82,255,124,0.9); }
+
+/* DRAG-TO-TRIM HANDLES -- thin grab zones at each clip's edges so you can
+trim directly on the timeline instead of only via the side Trim panel. */
+.clip-edge-trim-handle { position: absolute; top: 0; bottom: 0; width: 7px; cursor: ew-resize; z-index: 12; background: transparent; }
+.clip-edge-trim-handle.edge-left { left: 0; }
+.clip-edge-trim-handle.edge-right { right: 0; }
+.clip-edge-trim-handle:hover { background: rgba(255,188,0,0.5); }
+.timeline-snap-indicator-line { position: absolute; top: 0; bottom: 0; width: 2px; background-color: #52ff7c; box-shadow: 0 0 6px rgba(82,255,124,0.9); pointer-events: none; display: none; z-index: 98; }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+<!-- LANDING HOME PAGE OVERLAY -->
+<div id="home-landing-page" onclick="launchStudio()">
+<div class="landing-content" onclick="event.stopPropagation()">
+<h1 class="landing-title">CUTLOOM</h1>
+<p class="landing-subtitle">Free, Powerful Browser-Based Video Editor</p>
+
+<div class="landing-features">
+<span>⚡ WebGL Accelerated</span>
+<span>🎬 4K Exporting</span>
+<span>🔒 100% Private & Browser-Based</span>
+</div>
+
+<button class="btn-launch-studio" onclick="launchStudio()">
+Launch Editor →
+</button>
+</div>
+</div>
+<canvas id="ultraPerformanceDownsampleBuffer" width="480" height="270" style="display:none;"></canvas>
+<canvas id="transitionIncomingBuffer" width="480" height="270" style="display:none;"></canvas>
+<canvas id="webglFilterCanvas" width="480" height="270" style="display:none;"></canvas>
+<div id="hiddenHardwareVideoCacheCage" style="display:none;"></div>
+
+<div class="app-view-container">
+<div class="left-production-column">
+<div class="top-utility-deck">
+<div style="font-size: 10px; color:#6d6d80; font-weight: bold;">CutLoom CORE PRO ENGINE</div>
+<div style="display:flex; align-items:center; gap:6px;">
+<button class="btn-interval-node" id="btn-undo" onclick="performUndo()" disabled title="Undo (Ctrl+Z)"><i class="bi bi-arrow-counterclockwise"></i> Undo</button>
+<button class="btn-interval-node" id="btn-redo" onclick="performRedo()" disabled title="Redo (Ctrl+Y)"><i class="bi bi-arrow-clockwise"></i> Redo</button>
+<button class="btn-interval-node" onclick="saveProjectToBrowser()" title="Save project + media to this browser"><i class="bi bi-floppy"></i> Save</button>
+<button class="btn-interval-node" onclick="loadProjectFromBrowser()" title="Load last saved project from this browser"><i class="bi bi-folder2-open"></i> Load</button>
+<button class="btn-interval-node" onclick="openModal('aboutModal')" style="background: transparent; color: #666; border: none; font-size: 10px; cursor: pointer; padding: 2px 4px;">About</button>
+<button class="btn-interval-node" onclick="openModal('privacyModal')" style="background: transparent; color: #666; border: none; font-size: 10px; cursor: pointer; padding: 2px 4px;">Privacy</button>
+</div>
+<div id="timerDigitalDisplay" style="font-family: monospace; color: #ffbc00; font-weight: bold;">00:00.00</div>
+</div>
+
+<!-- VIEWPORT SCREEN MONITOR -->
+<section class="monitor-stage-viewport">
+<div class="canvas-frame-container">
+<canvas id="productionRenderCanvas" width="1920" height="1080"></canvas>
+</div>
+<div class="playback-control-deck">
+<div class="timer-label">00:00.00</div>
+<div class="center-controls">
+<button class="control-node" onclick="stopPlayback()"><i class="bi bi-stop-fill"></i> Stop</button>
+<button class="control-node" onclick="togglePlayback()"><i class="bi bi-play-fill"></i> Play/Pause</button>
+<button class="control-node" id="globalSlowMoActionButton" onclick="toggleGlobalSlowMotionMode()"><i class="bi bi-hourglass-split"></i> SlowMo</button>
+</div>
+<div class="timer-label" id="totalDurationLabel">00:00.00</div>
+</div>
+</section>
+
+<div class="timeline-controls-header-bar">
+<div class="timeline-zoom-container">
+<span><i class="bi bi-search"></i> Track Scale visual expansion:</span>
+<input type="range" class="timeline-zoom-slider" id="timelineZoomSlider" min="0.5" max="5.0" step="0.1" value="1.0" oninput="handleTimelineZoomAdjust()">
+</div>
+<div style="font-size: 10px; color:#ffbc00; font-weight: bold;">TIMELINE SEQUENCER MATRIX</div>
+</div>
+
+<!-- SEQUENCER MATRIX TRACKS -->
+<section class="timeline-deck-panel">
+<div id="playheadOverlayContainer">
+<div class="timeline-playhead-line" id="timelinePlayheadLine"></div>
+<div class="timeline-snap-indicator-line" id="timelineSnapIndicatorLine"></div>
+</div>
+
+<!-- Video Track Lane -->
+<div class="timeline-row-lane">
+<div class="track-descriptor"><span>Primary Video</span><button class="btn-append-track-node" onclick="document.getElementById('fileInputVideo').click()">+</button></div>
+<div class="track-content-flow-lane" id="trackVideoLane">
+<input type="file" id="fileInputVideo" class="hidden-file-input" accept="video/*" onchange="importVideoAsset(event)">
+<div class="timeline-hover-skimming-line" id="timelineHoverSkimmingLine"></div>
+<div class="timeline-clip-container-wrapper" id="videoClipContainer"></div>
+</div>
+</div>
+
+<!-- Overlay Track Lane -->
+<div class="timeline-row-lane">
+<div class="track-descriptor"><span>PiP Overlay</span><button class="btn-append-track-node" onclick="document.getElementById('fileInputPip').click()">+</button></div>
+<div class="track-content-flow-lane" id="trackPipLane">
+<input type="file" id="fileInputPip" class="hidden-file-input" accept="image/*" onchange="importPipAsset(event)">
+<div class="timeline-clip-container-wrapper" id="pipClipContainer"></div>
+</div>
+</div>
+
+<!-- Text Track Lane -->
+<div class="timeline-row-lane">
+<div class="track-descriptor"><span>Text</span><button class="btn-append-track-node" onclick="addTextClip()">+</button></div>
+<div class="track-content-flow-lane" id="trackTextLane">
+<div class="timeline-clip-container-wrapper" id="textClipContainer"></div>
+</div>
+</div>
+
+<!-- Audio Track Lane -->
+<div class="timeline-row-lane">
+<div class="track-descriptor"><span>Music Track</span><button class="btn-append-track-node" onclick="document.getElementById('fileInputAudio').click()">+</button></div>
+<div class="track-content-flow-lane" id="trackAudioLane">
+<input type="file" id="fileInputAudio" class="hidden-file-input" accept="audio/*" onchange="importAudioAsset(event, 'audio')">
+<div class="timeline-clip-container-wrapper" id="audioClipContainer"></div>
+</div>
+</div>
+
+<!-- Second Audio Track Lane -->
+<div class="timeline-row-lane">
+<div class="track-descriptor"><span>Sound FX</span><button class="btn-append-track-node" onclick="document.getElementById('fileInputAudio2').click()">+</button></div>
+<div class="track-content-flow-lane" id="trackAudio2Lane">
+<input type="file" id="fileInputAudio2" class="hidden-file-input" accept="audio/*" onchange="importAudioAsset(event, 'music2')">
+<div class="timeline-clip-container-wrapper" id="music2ClipContainer"></div>
+</div>
+</div>
+
+<!-- Time Progress Tracker row -->
+<div class="timeline-row-lane" style="height: 14px; background: transparent; border: none; margin-top: 4px; padding-bottom: 0;">
+<div class="track-descriptor" style="border:none; width: 140px; color: #525266;">Time Progress</div>
+<div class="track-content-flow-lane" id="scrubberInteractiveLane" style="background: transparent; cursor: pointer;" onclick="scrubToTimelinePosition(event)">
+<div class="mini-scrubber-progress-track">
+<div class="mini-scrubber-fill-bar" id="miniScrubberFillBar"></div>
+</div>
+</div>
+</div>
+
+<!-- 5-Second Interval Ticks Tracker row -->
+<div class="timeline-row-lane" style="height: 24px; background: transparent; border: none; margin-bottom: 4px;">
+<div class="track-descriptor" style="border:none; width: 140px;"></div>
+<div class="track-content-flow-lane" style="background: transparent; overflow: visible;">
+<div class="clean-seconds-ticks-wrapper" id="cleanSecondsTicksWrapper"></div>
+</div>
+</div>
+
+<!-- DYNAMIC BOTTOM DISPLAY PANEL -->
+<div class="multi-purpose-contextual-screen" id="multiPurposeContextualScreen">
+<div class="context-view-section" id="contextSection-trim">
+<div class="trim-meta-header">
+<div id="trimModalTimeCounter">Clip Total: 00:00.00</div>
+<div>
+<span id="trimModalIndexCounter" style="color: #ffbc00;">Duration Selected: 0.00s</span>
+<input type="text" class="trim-manual-numeric-input-box" id="trimManualNumericInputBox" placeholder="Secs..." onkeydown="handleTrimManualInputExecution(event)">
+</div>
+</div>
+<div class="trim-filmstrip-track-wrapper" id="trimFilmstripTrackWrapper">
+<div class="trim-interactive-slider-range" id="trimInteractiveSliderRange">
+<div class="trim-slider-handle" style="left: 0px;" id="trimHandleLeft">│</div>
+<div class="trim-slider-handle" style="right: 0px;" id="trimHandleRight">│</div>
+</div>
+</div>
+<div class="trim-interval-row-deck">
+<button class="btn-interval-node active-interval" onclick="setTrimIntervalScale(0, this)">Original</button>
+<button class="btn-interval-node" onclick="setTrimIntervalScale(1, this)">1s</button>
+<button class="btn-interval-node" onclick="setTrimIntervalScale(5, this)">5s</button>
+</div>
+</div>
+
+<div class="context-view-section" id="contextSection-size">
+<div class="trim-meta-header"><div style="color: #ffbc00;">Project Canvas Frame Aspect Ratios</div></div>
+<div class="preset-chips-row-deck" style="margin-top: 14px;">
+<button class="btn-preset-chip active-chip" onclick="chooseAspectPresetValue('original', this)">Original Grid</button>
+<button class="btn-preset-chip" onclick="chooseAspectPresetValue('16-9', this)">16:9 Landscape YouTube</button>
+<button class="btn-preset-chip" onclick="chooseAspectPresetValue('9-16', this)">9:16 Portrait Shorts</button>
+<button class="btn-preset-chip" onclick="chooseAspectPresetValue('1-1', this)">1:1 Square Post</button>
+</div>
+</div>
+
+<!-- DYNAMIC CATEGORIZED BROWSER PANEL FOR FILTERS -->
+<div class="context-view-section" id="contextSection-filter">
+<div class="trim-meta-header"><div style="color: #ffbc00;" id="filterPanelDescriptorTitle">Asset Visual FX & LUT Pipeline Matrix</div></div>
+<div class="filter-matrix-browser-container">
+<div class="filter-category-menu-sidebar">
+<button class="btn-filter-category-selector active-category-tab" onclick="switchFilterCategoryTab('life', this)">Life</button>
+<button class="btn-filter-category-selector" onclick="switchFilterCategoryTab('movies', this)">Movies</button>
+<button class="btn-filter-category-selector" onclick="switchFilterCategoryTab('style', this)">Style</button>
+<button class="btn-filter-category-selector" onclick="switchFilterCategoryTab('foodie', this)">Foodie</button>
+<button class="btn-filter-category-selector" onclick="switchFilterCategoryTab('nature', this)">Nature</button>
+<button class="btn-filter-category-selector" onclick="switchFilterCategoryTab('trending', this)">Trending</button>
+<button class="btn-filter-category-selector" onclick="switchFilterCategoryTab('basicfx', this)">Basic FX</button>
+<button class="btn-filter-category-selector" onclick="switchFilterCategoryTab('lens', this)">Lens</button>
+<button class="btn-filter-category-selector" onclick="switchFilterCategoryTab('body', this)">Body Tracking</button>
+<button class="btn-filter-category-selector" onclick="switchFilterCategoryTab('party', this)">Party</button>
+<button class="btn-filter-category-selector" onclick="switchFilterCategoryTab('anime', this)">Comic/Anime</button>
+<button class="btn-filter-category-selector" onclick="switchFilterCategoryTab('distortion', this)">Distort</button>
+</div>
+<div class="filter-chips-scroll-lane" id="filterChipsScrollLane"></div>
+</div>
+</div>
+
+<div class="context-view-section" id="contextSection-flow">
+<div class="trim-meta-header"><div style="color: #ffbc00;">Time Warp & Speed Ramp Engine</div></div>
+<div class="preset-chips-row-deck" style="margin-top: 14px;">
+<button class="btn-preset-chip" onclick="applyTimeVelocityWarp(0.5, this)">0.5x Slow Motion</button>
+<button class="btn-preset-chip active-chip" onclick="applyTimeVelocityWarp(1.0, this)">1.0x Normal Speed</button>
+<button class="btn-preset-chip" onclick="applyTimeVelocityWarp(2.0, this)">2.0x Fast Hyperlapse</button>
+<button class="btn-preset-chip" onclick="applyTimeVelocityWarp(4.0, this)">4.0x Velocity Sprint</button>
+</div>
+</div>
+
+<div class="context-view-section" id="contextSection-cutout">
+<div class="trim-meta-header"><div style="color: #ffbc00;">Transitions (applies between two adjacent clips)</div></div>
+<div class="preset-chips-row-deck" style="margin-top: 14px; flex-wrap: wrap;">
+<button class="btn-preset-chip active-chip" onclick="applyTransitionBlendMode('none', this)">Hard Cut</button>
+<button class="btn-preset-chip" onclick="applyTransitionBlendMode('fadein', this)">Fade In</button>
+<button class="btn-preset-chip" onclick="applyTransitionBlendMode('fadeout', this)">Fade Out</button>
+<button class="btn-preset-chip" onclick="applyTransitionBlendMode('washout', this)">Wash Out</button>
+<button class="btn-preset-chip" onclick="applyTransitionBlendMode('cross', this)">Cross Dissolve</button>
+<button class="btn-preset-chip" onclick="applyTransitionBlendMode('rippledissolve', this)">Ripple Dissolve</button>
+<button class="btn-preset-chip" onclick="applyTransitionBlendMode('jumpcut', this)">Jump Cut</button>
+<button class="btn-preset-chip" onclick="applyTransitionBlendMode('cutaway', this)">Cutaway</button>
+<button class="btn-preset-chip" onclick="applyTransitionBlendMode('irisin', this)">Iris In</button>
+<button class="btn-preset-chip" onclick="applyTransitionBlendMode('irisout', this)">Iris Out</button>
+</div>
+</div>
+
+<div class="context-actions-footer">
+<button class="btn-classy-action-node btn-classy-cancel" onclick="closeContextScreenArea()">Cancel</button>
+<button class="btn-classy-action-node btn-classy-confirm" onclick="confirmContextScreenAreaChanges()">Apply Changes</button>
+</div>
+</div>
+</section>
+</div>
+
+<!-- RIGHT SIDEBAR INSPECTOR -->
+<aside class="inspector-control-sidebar">
+<div class="inspector-tab-bar">
+<button class="inspector-tab-btn active-inspector-tab" id="tabBtn-transform" onclick="switchInspectorTab('transform')" title="Transform"><i class="bi bi-arrows-move"></i></button>
+<button class="inspector-tab-btn" id="tabBtn-effects" onclick="switchInspectorTab('effects')" title="Effects"><i class="bi bi-magic"></i></button>
+<button class="inspector-tab-btn" id="tabBtn-audio" onclick="switchInspectorTab('audio')" title="Audio"><i class="bi bi-volume-up"></i></button>
+<button class="inspector-tab-btn" id="tabBtn-text" onclick="switchInspectorTab('text')" title="Text"><i class="bi bi-fonts"></i></button>
+<button class="inspector-tab-btn" id="tabBtn-actions" onclick="switchInspectorTab('actions')" title="Actions"><i class="bi bi-lightning-charge"></i></button>
+</div>
+
+<!-- TRANSFORM TAB -->
+<div class="inspector-tab-panel" id="tabPanel-transform">
+<div class="inspector-section-title">Geometry</div>
+<div class="inspector-grid-buttons">
+<div class="icon-btn-container"><button class="btn-icon-only" onclick="mutateGeometry('rotate')"><i class="bi bi-arrow-repeat"></i></button><div class="icon-sub-label">Rot 90°</div></div>
+<div class="icon-btn-container"><button class="btn-icon-only" id="btn-mirror" onclick="mutateGeometry('mirror')"><i class="bi bi-symmetry-vertical"></i></button><div class="icon-sub-label">Mirror</div></div>
+<div class="icon-btn-container"><button class="btn-icon-only" id="btn-flip" onclick="mutateGeometry('flip')"><i class="bi bi-symmetry-horizontal"></i></button><div class="icon-sub-label">Flip</div></div>
+<div class="icon-btn-container"><button class="btn-icon-only" id="btn-crop" onclick="mutateGeometry('crop')"><i class="bi bi-crop"></i></button><div class="icon-sub-label">Crop</div></div>
+<div class="icon-btn-container"><button class="btn-icon-only" onclick="revealTargetContextScreen('size')"><i class="bi bi-aspect-ratio"></i></button><div class="icon-sub-label">Size</div></div>
+<div class="icon-btn-container"><button class="btn-icon-only" onclick="revealTargetContextScreen('flow')"><i class="bi bi-speedometer2"></i></button><div class="icon-sub-label">Flow</div></div>
+</div>
+
+<div class="inspector-section-title">Transform (select a clip)</div>
+<div class="xform-row">
+<span class="xform-label">Pos X/Y</span>
+<input type="number" class="xform-input" id="xformPosX" step="1" value="0" onchange="handleTransformFieldChange('posX')">
+<input type="number" class="xform-input" id="xformPosY" step="1" value="0" onchange="handleTransformFieldChange('posY')">
+<button class="xform-nav-btn" onclick="jumpToKeyframe('posX',-1)">◀</button>
+<button class="btn-keyframe-diamond" id="kfBtn-posX" onclick="toggleKeyframeAtPlayhead('posX')" title="Keyframe Position">◆</button>
+<button class="xform-nav-btn" onclick="jumpToKeyframe('posX',1)">▶</button>
+</div>
+<div class="xform-row">
+<span class="xform-label">Scale %</span>
+<input type="number" class="xform-input" id="xformScale" step="1" value="100" onchange="handleTransformFieldChange('scale')">
+<button class="xform-nav-btn" onclick="jumpToKeyframe('scale',-1)">◀</button>
+<button class="btn-keyframe-diamond" id="kfBtn-scale" onclick="toggleKeyframeAtPlayhead('scale')" title="Keyframe Scale">◆</button>
+<button class="xform-nav-btn" onclick="jumpToKeyframe('scale',1)">▶</button>
+</div>
+<div class="xform-row">
+<span class="xform-label">Rotate °</span>
+<input type="number" class="xform-input" id="xformRotation" step="1" value="0" onchange="handleTransformFieldChange('rotation')">
+<button class="xform-nav-btn" onclick="jumpToKeyframe('rotation',-1)">◀</button>
+<button class="btn-keyframe-diamond" id="kfBtn-rotation" onclick="toggleKeyframeAtPlayhead('rotation')" title="Keyframe Rotation">◆</button>
+<button class="xform-nav-btn" onclick="jumpToKeyframe('rotation',1)">▶</button>
+</div>
+<div class="mini-note">◆ sets/removes a keyframe for that property at the current playhead time on the selected clip. With 2+ keyframes the value animates between them.</div>
+
+<div class="inspector-section-title">Blend / Crop / Mask (selected clip)</div>
+<div class="xform-row"><span class="xform-label">Blend</span>
+<select class="select-dropdown" id="xformBlendMode" onchange="handleBlendModeChange()">
+<option value="source-over">Normal</option>
+<option value="multiply">Multiply</option>
+<option value="screen">Screen</option>
+<option value="overlay">Overlay</option>
+<option value="darken">Darken</option>
+<option value="lighten">Lighten</option>
+<option value="color-dodge">Color Dodge</option>
+<option value="color-burn">Color Burn</option>
+<option value="hard-light">Hard Light</option>
+<option value="soft-light">Soft Light</option>
+<option value="difference">Difference</option>
+<option value="exclusion">Exclusion</option>
+</select>
+</div>
+<div class="xform-row"><span class="xform-label">Crop %</span>
+<input type="number" class="xform-input" id="cropLeft" min="0" max="90" value="0" onchange="handleCropFieldChange()">
+<input type="number" class="xform-input" id="cropTop" min="0" max="90" value="0" onchange="handleCropFieldChange()">
+</div>
+<div class="xform-row"><span class="xform-label">Crop R/B</span>
+<input type="number" class="xform-input" id="cropRight" min="0" max="90" value="0" onchange="handleCropFieldChange()">
+<input type="number" class="xform-input" id="cropBottom" min="0" max="90" value="0" onchange="handleCropFieldChange()">
+</div>
+<div class="xform-row"><span class="xform-label">Mask</span>
+<select class="select-dropdown" id="xformMaskType" onchange="handleMaskChange()">
+<option value="none">None</option>
+<option value="rect">Rectangle</option>
+<option value="circle">Circle</option>
+</select>
+</div>
+</div>
+
+<!-- EFFECTS TAB -->
+<div class="inspector-tab-panel" id="tabPanel-effects" style="display:none;">
+<div class="inspector-section-title">Effects Suite</div>
+<div class="inspector-grid-buttons">
+<div class="icon-btn-container"><button class="btn-icon-only" onclick="revealTargetContextScreen('filter')"><i class="bi bi-droplet-half"></i></button><div class="icon-sub-label">Filter</div></div>
+<div class="icon-btn-container"><button class="btn-icon-only" id="btn-fx" onclick="mutateFilter('fx')"><i class="bi bi-stars"></i></button><div class="icon-sub-label">Glow</div></div>
+<div class="icon-btn-container"><button class="btn-icon-only" id="btn-mosaic" onclick="mutateFilter('mosaic')"><i class="bi bi-grid-3x3-gap"></i></button><div class="icon-sub-label">Mosaic</div></div>
+<div class="icon-btn-container"><button class="btn-icon-only" id="btn-focus" onclick="mutateFilter('focus')"><i class="bi bi-bullseye"></i></button><div class="icon-sub-label">Focus</div></div>
+<div class="icon-btn-container"><button class="btn-icon-only" id="btn-bg" onclick="mutateFilter('bg')"><i class="bi bi-image"></i></button><div class="icon-sub-label">Chroma Key</div></div>
+<div class="icon-btn-container"><button class="btn-icon-only" id="btn-border" onclick="mutateFilter('border')"><i class="bi bi-square"></i></button><div class="icon-sub-label">Border</div></div>
+<div class="icon-btn-container"><button class="btn-icon-only" id="btn-track" onclick="mutateFilter('track')"><i class="bi bi-crosshair"></i></button><div class="icon-sub-label">Tracker</div></div>
+</div>
+<div class="xform-row"><span class="xform-label">Key Color</span>
+<input type="color" class="xform-color" id="chromaKeyColorPicker" value="#00b140" onchange="executeCompositingDrawingSequence()">
+<input type="range" class="slider-element" id="chromaKeyThreshold" min="5" max="120" step="1" value="45" oninput="executeCompositingDrawingSequence()" style="flex:1;">
+</div>
+<div class="mini-note">Chroma Key removes pixels near Key Color (works on real green/blue-screen footage). Threshold widens the match range.</div>
+
+<div class="inspector-section-title">Compositing Filters</div>
+<div class="slider-control-row"><label>Zoom Viewport</label><input type="range" class="slider-element" id="engineZoom" min="0.1" max="5" step="0.05" value="1" oninput="executeCompositingDrawingSequence()"></div>
+<div class="slider-control-row"><label>Alpha Opacity Blend</label><input type="range" class="slider-element" id="engineOpacity" min="0" max="1" step="0.05" value="1" oninput="executeCompositingDrawingSequence()"></div>
+<div class="slider-control-row"><label>Gaussian Blur</label><input type="range" class="slider-element" id="engineBlur" min="0" max="20" step="1" value="0" oninput="executeCompositingDrawingSequence()"></div>
+
+<div class="inspector-section-title">AI Background Removal</div>
+<div class="management-action-row">
+<button class="btn-mgmt-action btn-mgmt-save" id="btn-ai-bg-load" onclick="loadAiSegmentationModel()">Load AI Model</button>
+<button class="btn-mgmt-action btn-mgmt-delete" id="btn-ai-bg-toggle" onclick="toggleAiBackgroundRemoval()" disabled>Enable</button>
+</div>
+<div class="ai-status-line" id="aiBgStatusLine">Model not loaded. Requires internet access to fetch TensorFlow.js (~/mnt N/A, loads from CDN at runtime).</div>
+<div class="mini-note">Works on any footage (not just green-screen), but runs a real ML model in your browser -- it's slower and needs internet the first time to download it, and works best on people/subjects with a visible outline.</div>
+</div>
+
+<!-- AUDIO TAB -->
+<div class="inspector-tab-panel" id="tabPanel-audio" style="display:none;">
+<div class="inspector-section-title">Audio (selected clip)</div>
+<div class="xform-row"><span class="xform-label">Volume %</span>
+<input type="number" class="xform-input" id="xformVolume" min="0" max="100" step="1" value="100" onchange="handleTransformFieldChange('volume')">
+<button class="btn-keyframe-diamond" id="kfBtn-volume" onclick="toggleKeyframeAtPlayhead('volume')" title="Keyframe Volume (use for fade in/out)">◆</button>
+</div>
+<div class="mini-note">Keyframe Volume at 0% then 100% a moment later for a fade-in (or reverse for fade-out).</div>
+
+<div class="inspector-section-title">Tools</div>
+<div class="inspector-grid-buttons">
+<div class="icon-btn-container"><button class="btn-icon-only" id="btn-denoise" onclick="triggerAudioDenoiser()"><i class="bi bi-volume-mute"></i></button><div class="icon-sub-label">DeNoise</div></div>
+</div>
+</div>
+
+<!-- TEXT TAB -->
+<div class="inspector-tab-panel" id="tabPanel-text" style="display:none;">
+<div class="inspector-section-title">Text (selected text clip)</div>
+<div class="xform-row"><span class="xform-label">Content</span>
+<input type="text" class="xform-input" id="textContentInput" style="width: 130px;" placeholder="Type here..." onchange="handleTextContentChange()">
+</div>
+<div class="xform-row"><span class="xform-label">Size/Color</span>
+<input type="number" class="xform-input" id="textFontSize" min="8" max="300" value="64" onchange="handleTextStyleChange()">
+<input type="color" class="xform-color" id="textColorPicker" value="#ffffff" onchange="handleTextStyleChange()">
+</div>
+<div class="mini-note">Position/Scale/Rotation/Blend for text use the Transform tab, same as video and PiP clips.</div>
+
+<div class="inspector-section-title">Tools</div>
+<div class="inspector-grid-buttons">
+<div class="icon-btn-container"><button class="btn-icon-only" onclick="triggerAutoSubtitles()"><i class="bi bi-badge-cc"></i></button><div class="icon-sub-label">AutoSub</div></div>
+</div>
+</div>
+
+<!-- ACTIONS TAB -->
+<div class="inspector-tab-panel" id="tabPanel-actions" style="display:none;">
+<div class="inspector-section-title">Cuts & Actions</div>
+<div class="inspector-grid-buttons">
+<div class="icon-btn-container"><button class="btn-icon-only" onclick="executeClipSliceOperation()"><i class="bi bi-scissors"></i></button><div class="icon-sub-label" style="color:#ef4444; font-weight:bold;">Split</div></div>
+<div class="icon-btn-container"><button class="btn-icon-only" onclick="revealTargetContextScreen('trim')"><i class="bi bi-film"></i></button><div class="icon-sub-label">Trim</div></div>
+<div class="icon-btn-container"><button class="btn-icon-only" onclick="revealTargetContextScreen('cutout')"><i class="bi bi-shuffle"></i></button><div class="icon-sub-label">Transition</div></div>
+</div>
+
+<div class="inspector-section-title">Utility Management</div>
+<div class="management-action-row">
+<button class="btn-mgmt-action btn-mgmt-delete" onclick="flushActiveWorkspace()">Delete Clip</button>
+<button class="btn-mgmt-action btn-mgmt-save" id="btn-export" onclick="exportProjectAsVideo()">Export Video</button>
+</div>
+</div>
+</aside>
+</div>
+
+<div class="toast-feedback" id="toastNode">Engine Core Active</div>
+
+<script>
+let playbackEngineRunning = false;
+let currentTimeOffsetSeconds = 0;
+let timelineDurationBoundsSeconds = 300;
+let globalTimelineVisualZoomScale = 1.0;
+let lastTimestampHardwareClock = 0;
+let masterSlowMoActiveToggle = false;
+
+let tracksRegistryMap = { video: [], pip: [], audio: [], text: [], music2: [] };
+const AUDIO_TRACK_KEYS = ['audio', 'music2']; // both behave identically, just separate lanes
+// Maps clip.id -> its DOM element (video/audio/img). History snapshots and saved
+// projects store plain JSON clip data (no DOM nodes), then re-attach the real
+// element back onto the restored clip by looking it up here.
+let elementRegistry = {};
+// File/Blob objects also don't survive JSON.stringify (they collapse to {}),
+// so the original source file for each clip is tracked separately here too,
+// rather than living inside history snapshots.
+let fileRegistry = {};
+let undoStack = [];
+let redoStack = [];
+const MAX_HISTORY_STATES = 50;
+let activeSelectedClipObject = null;
+let globalClipIdIncrementer = 0;
+
+let transformRotationStateDegrees = 0;
+let horizontalMirrorActive = false; let verticalFlipActive = false;
+let activeColorFilterLutMode = 'none';
+let neonGlowActive = false; let mosaicActive = false; let vignetteFocusActive = false;
+let chromaKeyAlphaActive = false; let borderFrameActive = false;
+let isCroppedState = false; let trackingEngineActive = false;
+let currentAspectRatio = 'original';
+
+let currentTimeWarpVelocity = 1.0;
+let activeTransitionMode = 'none';
+
+let isCurrentlyHoverSkimming = false;
+let hoverSkimTimeTargetSeconds = 0;
+
+let activeOpenContextView = 'none';
+let currentTrimPercentStart = 0; let currentTrimPercentEnd = 100;
+let originalClipMaxDuration = 0;
+let currentActiveDraggingNode = null; let dragStartMouseX = 0;
+let dragStartPercentLeft = 0; let dragStartPercentRight = 0;
+
+let isDraggingTrackBlock = false;
+let historySnapshotTakenForThisDrag = false;
+let blockDragMouseStartX = 0;
+let blockDragInitialTimelineOffset = 0;
+
+const filtersAndEffectsDatabase = {
+life: ['Daily', 'Cream', 'Cozy', 'Warm', 'Cool', 'Fresh', 'Forest'],
+movies: ['Retro', 'Classic', 'French', 'Cinema', 'B&W', 'Indie'],
+style: ['Sparkle', 'Mono', 'Party', 'Vibe', 'Sweet', 'Neon Filter'],
+foodie: ['Meat', 'Bakery', 'Fruit', 'Dessert', 'Fresh Food'],
+nature: ['Spring', 'Summer', 'Autumn', 'Winter'],
+trending: ['Viral Glow', 'Cinematic LUT', 'CapCut Vibe', 'Pop Trend'],
+basicfx: ['Blur Effect', 'Chromatic Aberration', 'Edge Glow', 'Shake Frame', 'Digital Noise', 'Drop Shadow Overlay', 'Screen Flash'],
+lens: ['Dreamy Vignette', 'Wide Angle View', 'Fisheye Distortion', 'Quad Mirror', 'Split Screen Pass', 'Retro Cam Matrix', 'VHS Tape Line'],
+body: ['Neon Outline Trail', 'Wings Overlay FX', 'Subject Clone Engine'],
+party: ['Strobe Shutter', 'Neon Color Pulse', 'Colored Flash Loop', 'Flicker Ambient'],
+anime: ['Cartoon Outline Pass', 'Pencil Shading Sketch', 'Comic Book Look'],
+distortion: ['Wave Warp Shift', 'Water Ripple Engine', 'Pinch Distort Center', 'Twirl Spin Displacement']
+};
+
+let currentActiveFilterLutToken = 'none';
+
+const mainRenderCanvas = document.getElementById('productionRenderCanvas');
+const canvasGraphicContext = mainRenderCanvas.getContext('2d');
+const downsampleBufferCanvas = document.getElementById('ultraPerformanceDownsampleBuffer');
+const downsampleBufferCtx = downsampleBufferCanvas.getContext('2d');
+const transitionIncomingBufferCanvas = document.getElementById('transitionIncomingBuffer');
+const transitionIncomingBufferCtx = transitionIncomingBufferCanvas.getContext('2d');
+const TRANSITION_DURATION_SECONDS = 1.0;
+
+const timerDigitalDisplay = document.getElementById('timerDigitalDisplay');
+const totalDurationLabel = document.getElementById('totalDurationLabel');
+const zoomSliderElement = document.getElementById('engineZoom');
+const trackVideoLane = document.getElementById('trackVideoLane');
+const timelinePlayheadLine = document.getElementById('timelinePlayheadLine');
+const timelineHoverSkimmingLine = document.getElementById('timelineHoverSkimmingLine');
+const miniScrubberFillBar = document.getElementById('miniScrubberFillBar');
+const cleanSecondsTicksWrapper = document.getElementById('cleanSecondsTicksWrapper');
+
+const multiPurposeContextualScreen = document.getElementById('multiPurposeContextualScreen');
+const trimSliderRange = document.getElementById('trimInteractiveSliderRange');
+const trimFilmstripTrackWrapper = document.getElementById('trimFilmstripTrackWrapper');
+const trimHandleLeft = document.getElementById('trimHandleLeft');
+const trimHandleRight = document.getElementById('trimHandleRight');
+const trimManualNumericInputBox = document.getElementById('trimManualNumericInputBox');
+const toastNode = document.getElementById('toastNode');
+
+// formatTimeLayout and scrubToTimelinePosition were referenced everywhere
+// (ruler labels, timer display, trim panel, scrubber click) but never defined
+// anywhere in the original script -- every one of those call sites was throwing
+// a ReferenceError and silently breaking. Defining them fixes the whole chain.
+function formatTimeLayout(totalSeconds) {
+if (!isFinite(totalSeconds) || totalSeconds < 0) totalSeconds = 0;
+const mins = Math.floor(totalSeconds / 60);
+const secs = Math.floor(totalSeconds % 60);
+const centis = Math.floor((totalSeconds - Math.floor(totalSeconds)) * 100);
+return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(centis).padStart(2, '0')}`;
+}
+
+function scrubToTimelinePosition(event) {
+const lane = document.getElementById('scrubberInteractiveLane');
+const bounds = lane.getBoundingClientRect();
+const percentX = ((event.clientX - bounds.left) / bounds.width) * 100;
+isCurrentlyHoverSkimming = false;
+currentTimeOffsetSeconds = Math.max(0, Math.min(timelineDurationBoundsSeconds, (percentX / 100) * timelineDurationBoundsSeconds));
+updateTimelineUIMetrics();
+executeCompositingDrawingSequence();
+}
+
+function showNotificationAlert(msg) {
+toastNode.innerText = msg; toastNode.style.opacity = "1";
+setTimeout(() => { toastNode.style.opacity = "0"; }, 2500);
+}
+
+// Switches which sidebar tab panel is visible -- Transform/Effects/Audio/
+// Text/Actions were all previously stacked and visible at once, requiring a
+// long scroll to reach anything below Geometry. Now only one group shows at
+// a time, like Premiere's Effect Controls / Lumetri tabs.
+function switchInspectorTab(tabName) {
+document.querySelectorAll('.inspector-tab-panel').forEach(panel => panel.style.display = 'none');
+document.querySelectorAll('.inspector-tab-btn').forEach(btn => btn.classList.remove('active-inspector-tab'));
+document.getElementById(`tabPanel-${tabName}`).style.display = 'flex';
+document.getElementById(`tabBtn-${tabName}`).classList.add('active-inspector-tab');
+}
+
+function toggleGlobalSlowMotionMode() {
+masterSlowMoActiveToggle = !masterSlowMoActiveToggle;
+const btn = document.getElementById('globalSlowMoActionButton');
+
+if (masterSlowMoActiveToggle) {
+btn.classList.add('active-slowmo');
+currentTimeWarpVelocity = 0.5;
+showNotificationAlert("🐢 Cinema Slow-Motion Active (0.5x Smooth Playback)");
+} else {
+btn.classList.remove('active-slowmo');
+currentTimeWarpVelocity = 1.0;
+showNotificationAlert("⚡ Normal Speed Restored (1.0x Real-time)");
+}
+
+// preservesPitch keeps audio at its normal pitch during slow motion instead
+// of dropping into a "chipmunk"-reversed low pitch -- without it, playbackRate
+// changes both speed and pitch together, which sounds wrong for slow-mo.
+tracksRegistryMap.video.forEach(clip => {
+if (clip.element) { clip.element.playbackRate = currentTimeWarpVelocity; clip.element.preservesPitch = true; }
+});
+tracksRegistryMap.audio.forEach(clip => {
+if (clip.element) { clip.element.playbackRate = currentTimeWarpVelocity; clip.element.preservesPitch = true; }
+});
+executeCompositingDrawingSequence();
+}
+
+function revealTargetContextScreen(targetView) {
+if (targetView === 'trim' && !activeSelectedClipObject) {
+showNotificationAlert("Click on a track video clip block first!");
+return;
+}
+activeOpenContextView = targetView;
+multiPurposeContextualScreen.style.display = 'flex';
+
+document.querySelectorAll('.context-view-section').forEach(sec => sec.classList.remove('active-context'));
+document.getElementById(`contextSection-${targetView}`).classList.add('active-context');
+
+if (targetView === 'trim') {
+const clip = activeSelectedClipObject;
+originalClipMaxDuration = clip.originalDuration || clip.duration;
+currentTrimPercentStart = (clip.sourceStartOffset / originalClipMaxDuration) * 100;
+currentTrimPercentEnd = ((clip.sourceStartOffset + clip.duration) / originalClipMaxDuration) * 100;
+updateTrimSliderUIElements();
+}
+if (targetView === 'filter') {
+switchFilterCategoryTab('life', document.querySelector('.btn-filter-category-selector'));
+}
+}
+
+function switchFilterCategoryTab(categoryKey, node) {
+document.querySelectorAll('.btn-filter-category-selector').forEach(b => b.classList.remove('active-category-tab'));
+node.classList.add('active-category-tab');
+
+const container = document.getElementById('filterChipsScrollLane');
+container.innerHTML = '';
+
+const clearChip = document.createElement('button');
+clearChip.className = `btn-preset-chip ${currentActiveFilterLutToken === 'none' ? 'active-chip' : ''}`;
+clearChip.innerText = "Original Frame";
+clearChip.onclick = () => selectVisualPipelineFXToken('none', clearChip);
+container.appendChild(clearChip);
+
+filtersAndEffectsDatabase[categoryKey].forEach(fxName => {
+const chip = document.createElement('button');
+const token = fxName.toLowerCase().replace(/\s+/g, '-');
+chip.className = `btn-preset-chip ${currentActiveFilterLutToken === token ? 'active-chip' : ''}`;
+chip.innerText = fxName;
+chip.onclick = () => selectVisualPipelineFXToken(token, chip);
+container.appendChild(chip);
+});
+}
+
+function selectVisualPipelineFXToken(token, node) {
+document.querySelectorAll('#filterChipsScrollLane .btn-preset-chip').forEach(c => c.classList.remove('active-chip'));
+node.classList.add('active-chip');
+pushHistorySnapshot();
+currentActiveFilterLutToken = token;
+executeCompositingDrawingSequence();
+showNotificationAlert(`FX Chain Node Active: ${token.toUpperCase()}`);
+}
+
+function closeContextScreenArea() {
+multiPurposeContextualScreen.style.display = 'none';
+activeOpenContextView = 'none';
+}
+
+function confirmContextScreenAreaChanges() {
+if (activeOpenContextView === 'trim' && activeSelectedClipObject) {
+pushHistorySnapshot();
+const activeStartOffset = (currentTrimPercentStart / 100) * originalClipMaxDuration;
+const activeTrimDuration = ((currentTrimPercentEnd - currentTrimPercentStart) / 100) * originalClipMaxDuration;
+activeSelectedClipObject.sourceStartOffset = activeStartOffset;
+activeSelectedClipObject.duration = activeTrimDuration;
+rebuildVisualTrackLayoutLanes();
+}
+closeContextScreenArea();
+}
+
+function chooseAspectPresetValue(targetPresetString, node) {
+document.querySelectorAll('#contextSection-size .btn-preset-chip').forEach(c => c.classList.remove('active-chip'));
+node.classList.add('active-chip');
+currentAspectRatio = targetPresetString;
+applyCanvasAspectConstraints();
+}
+
+function applyTimeVelocityWarp(velocityValue, node) {
+document.querySelectorAll('#contextSection-flow .btn-preset-chip').forEach(c => c.classList.remove('active-chip'));
+node.classList.add('active-chip');
+currentTimeWarpVelocity = velocityValue;
+showNotificationAlert(`Velocity rate locked at: ${velocityValue}x`);
+}
+
+function applyTransitionBlendMode(modeValue, node) {
+document.querySelectorAll('#contextSection-cutout .btn-preset-chip').forEach(c => c.classList.remove('active-chip'));
+node.classList.add('active-chip');
+pushHistorySnapshot();
+activeTransitionMode = modeValue;
+showNotificationAlert(`Transition model loaded: ${modeValue}`);
+}
+
+// DeNoise: previously a one-shot fake button that just showed a success toast
+// and did nothing to the audio. Now a real toggle -- when enabled, a highpass
+// filter (cuts frequencies below ~150Hz, where most hum/rumble noise lives) is
+// inserted into the audio graph during Export, genuinely reducing low-frequency
+// noise in the exported file. It intentionally does NOT affect live playback/
+// monitoring in the editor -- retrofitting that safely would require rebuilding
+// how audio elements are played throughout the whole app, which risks breaking
+// existing playback. Being upfront about that scope limit here rather than
+// pretending it's fully real-time.
+let denoiseActive = false;
+function triggerAudioDenoiser() {
+denoiseActive = !denoiseActive;
+document.getElementById('btn-denoise').classList.toggle('active-tool', denoiseActive);
+showNotificationAlert(denoiseActive
+? "DeNoise armed -- low-frequency hum will be filtered out when you Export"
+: "DeNoise off");
+}
+
+// AutoSub: previously showed a fake "transcription complete" success message
+// and generated nothing. Genuine speech-to-text needs either a server-side
+// model or an API key (e.g. a cloud Speech-to-Text service) -- the browser's
+// native SpeechRecognition API only works on live microphone input, not on
+// decoding an existing video/audio file, so there's no honest way to make this
+// fully real client-side-only. This says so instead of pretending it worked.
+function triggerAutoSubtitles() {
+showNotificationAlert("AutoSub needs a speech-to-text service (cloud API or backend) -- not yet wired up. You can add Text clips manually on the Text tab for now.");
+}
+
+// --- Geometry (Rotate / Mirror / Flip / Crop) ---
+// These were wired to onclick="mutateGeometry(...)" but the function didn't exist
+// anywhere in the file, so every Geometry button was dead.
+function mutateGeometry(kind) {
+if (kind === 'rotate') {
+transformRotationStateDegrees = (transformRotationStateDegrees + 90) % 360;
+showNotificationAlert(`Rotated to ${transformRotationStateDegrees}°`);
+} else if (kind === 'mirror') {
+horizontalMirrorActive = !horizontalMirrorActive;
+document.getElementById('btn-mirror').classList.toggle('active-tool', horizontalMirrorActive);
+showNotificationAlert(horizontalMirrorActive ? "Mirror (horizontal flip) on" : "Mirror off");
+} else if (kind === 'flip') {
+verticalFlipActive = !verticalFlipActive;
+document.getElementById('btn-flip').classList.toggle('active-tool', verticalFlipActive);
+showNotificationAlert(verticalFlipActive ? "Vertical flip on" : "Vertical flip off");
+} else if (kind === 'crop') {
+// Previously this only flipped a boolean that nothing in the renderer
+// ever read -- the button did nothing visually. It's now wired to the
+// same real per-clip crop system as the Transform panel's Crop % fields.
+if (!activeSelectedClipObject) { showNotificationAlert("Select a clip first!"); return; }
+ensureClipTransformDefaults(activeSelectedClipObject);
+isCroppedState = !isCroppedState;
+document.getElementById('btn-crop').classList.toggle('active-tool', isCroppedState);
+const preset = isCroppedState ? 8 : 0;
+activeSelectedClipObject.crop = { left: preset, top: preset, right: preset, bottom: preset };
+refreshTransformPanelForSelectedClip();
+showNotificationAlert(isCroppedState ? "Quick crop-to-fill applied (8% each side)" : "Crop cleared");
+}
+executeCompositingDrawingSequence();
+}
+
+// --- Effects Suite (Glow / Mosaic / Focus / Chroma Key / Border / Tracker) ---
+// Same situation: onclick="mutateFilter(...)" pointed at nothing.
+function mutateFilter(kind) {
+if (kind === 'fx') {
+neonGlowActive = !neonGlowActive;
+document.getElementById('btn-fx').classList.toggle('active-tool', neonGlowActive);
+showNotificationAlert(neonGlowActive ? "Glow enabled" : "Glow disabled");
+} else if (kind === 'mosaic') {
+mosaicActive = !mosaicActive;
+document.getElementById('btn-mosaic').classList.toggle('active-tool', mosaicActive);
+showNotificationAlert(mosaicActive ? "Mosaic pixelation enabled" : "Mosaic disabled");
+} else if (kind === 'focus') {
+vignetteFocusActive = !vignetteFocusActive;
+document.getElementById('btn-focus').classList.toggle('active-tool', vignetteFocusActive);
+showNotificationAlert(vignetteFocusActive ? "Vignette focus enabled" : "Vignette focus disabled");
+} else if (kind === 'bg') {
+chromaKeyAlphaActive = !chromaKeyAlphaActive;
+document.getElementById('btn-bg').classList.toggle('active-tool', chromaKeyAlphaActive);
+showNotificationAlert(chromaKeyAlphaActive ? "Chroma key (green-screen) enabled" : "Chroma key disabled");
+} else if (kind === 'border') {
+borderFrameActive = !borderFrameActive;
+document.getElementById('btn-border').classList.toggle('active-tool', borderFrameActive);
+showNotificationAlert(borderFrameActive ? "Frame border enabled" : "Frame border disabled");
+} else if (kind === 'track') {
+trackingEngineActive = !trackingEngineActive;
+document.getElementById('btn-track').classList.toggle('active-tool', trackingEngineActive);
+showNotificationAlert(trackingEngineActive ? "Subject tracker marker enabled" : "Subject tracker disabled");
+}
+executeCompositingDrawingSequence();
+}
+
+// --- Split ---
+// onclick="executeClipSliceOperation()" had no matching function; Split silently
+// did nothing. This splits the selected video clip in two at the playhead.
+function executeClipSliceOperation() {
+if (!activeSelectedClipObject || activeSelectedClipObject.type !== 'video') {
+showNotificationAlert("Select a video clip on the timeline first!");
+return;
+}
+const clip = activeSelectedClipObject;
+const playhead = currentTimeOffsetSeconds;
+const clipEnd = clip.timelineStartOffset + clip.duration;
+if (playhead <= clip.timelineStartOffset + 0.05 || playhead >= clipEnd - 0.05) {
+showNotificationAlert("Move the playhead inside the clip to split it.");
+return;
+}
+const firstPartDuration = playhead - clip.timelineStartOffset;
+const secondPartDuration = clipEnd - playhead;
+
+pushHistorySnapshot();
+globalClipIdIncrementer++;
+const secondHalf = {
+id: globalClipIdIncrementer,
+name: clip.name + ' (2)',
+element: clip.element,
+duration: secondPartDuration,
+originalDuration: clip.originalDuration,
+sourceStartOffset: clip.sourceStartOffset + firstPartDuration,
+timelineStartOffset: playhead,
+type: 'video',
+width: clip.width, height: clip.height,
+canvasX: clip.canvasX, canvasY: clip.canvasY, canvasW: clip.canvasW, canvasH: clip.canvasH
+};
+ensureClipTransformDefaults(secondHalf);
+elementRegistry[secondHalf.id] = clip.element;
+if (fileRegistry[clip.id]) fileRegistry[secondHalf.id] = fileRegistry[clip.id];
+clip.duration = firstPartDuration;
+tracksRegistryMap.video.push(secondHalf);
+tracksRegistryMap.video.sort((a, b) => a.timelineStartOffset - b.timelineStartOffset);
+rebuildVisualTrackLayoutLanes();
+showNotificationAlert("Clip split at playhead");
+}
+
+// --- Canvas aspect ratio presets ---
+// onclick="chooseAspectPresetValue(...)" called applyCanvasAspectConstraints(),
+// which also didn't exist -- 16:9/9:16/1:1 presets never actually resized anything.
+function applyCanvasAspectConstraints() {
+let w = 1920, h = 1080;
+if (currentAspectRatio === '16-9') { w = 1920; h = 1080; }
+else if (currentAspectRatio === '9-16') { w = 1080; h = 1920; }
+else if (currentAspectRatio === '1-1') { w = 1080; h = 1080; }
+else if (currentAspectRatio === 'original' && tracksRegistryMap.video[0]) {
+w = tracksRegistryMap.video[0].width || 1920;
+h = tracksRegistryMap.video[0].height || 1080;
+}
+mainRenderCanvas.width = w;
+mainRenderCanvas.height = h;
+resizeInternalBuffers();
+showNotificationAlert(`Canvas set to ${w}×${h}`);
+executeCompositingDrawingSequence();
+}
+
+// Previously the internal processing buffer was fixed at 480x270 forever --
+// that ceiling existed because the old CPU pixel-loop filters (getImageData/
+// putImageData over every pixel) would have been too slow at higher res. Now
+// that filters can run on the GPU via WebGL (see renderFilterPipelineWebGL),
+// this raises the working resolution up to 1280px on the long edge. Capped
+// there rather than matching full output res, to keep the CPU fallback path
+// (used automatically if WebGL is unavailable) still reasonably fast too.
+function resizeInternalBuffers(overrideCap) {
+const cap = overrideCap || 1280;
+const scale = Math.min(1, cap / Math.max(mainRenderCanvas.width, mainRenderCanvas.height));
+const w = Math.max(2, Math.round(mainRenderCanvas.width * scale));
+const h = Math.max(2, Math.round(mainRenderCanvas.height * scale));
+downsampleBufferCanvas.width = w; downsampleBufferCanvas.height = h;
+transitionIncomingBufferCanvas.width = w; transitionIncomingBufferCanvas.height = h;
+}
+
+function drawCleanSecondsTicksRuler() {
+cleanSecondsTicksWrapper.innerHTML = '';
+let markInterval = 5;
+for (let i = 0; i <= timelineDurationBoundsSeconds; i += markInterval) {
+const tick = document.createElement('div');
+tick.className = 'seconds-tick-node major-second-mark';
+tick.style.left = `${((i * globalTimelineVisualZoomScale) / timelineDurationBoundsSeconds) * 100}%`;
+cleanSecondsTicksWrapper.appendChild(tick);
+
+const label = document.createElement('div');
+label.className = 'seconds-tick-label';
+label.innerText = formatTimeLayout(i).substring(3, 8);
+label.style.left = `${((i * globalTimelineVisualZoomScale) / timelineDurationBoundsSeconds) * 100}%`;
+cleanSecondsTicksWrapper.appendChild(label);
+}
+}
+
+function handleTimelineZoomAdjust() {
+globalTimelineVisualZoomScale = parseFloat(document.getElementById('timelineZoomSlider').value);
+rebuildVisualTrackLayoutLanes();
+drawCleanSecondsTicksRuler();
+}
+
+document.querySelectorAll('.track-content-flow-lane').forEach(lane => {
+lane.addEventListener('mousemove', function(event) {
+if (isDraggingTrackBlock) return;
+const bounds = lane.getBoundingClientRect();
+const mouseX = event.clientX - bounds.left;
+const percentX = (mouseX / bounds.width) * 100;
+
+hoverSkimTimeTargetSeconds = (percentX / 100) * (timelineDurationBoundsSeconds / globalTimelineVisualZoomScale);
+hoverSkimTimeTargetSeconds = Math.max(0, Math.min(timelineDurationBoundsSeconds, hoverSkimTimeTargetSeconds));
+
+timelineHoverSkimmingLine.style.display = 'block';
+timelineHoverSkimmingLine.style.left = `${percentX}%`;
+
+if (!playbackEngineRunning) {
+isCurrentlyHoverSkimming = true;
+executeCompositingDrawingSequence();
+}
+});
+
+lane.addEventListener('mouseleave', function() {
+timelineHoverSkimmingLine.style.display = 'none';
+if (!playbackEngineRunning) {
+isCurrentlyHoverSkimming = false;
+executeCompositingDrawingSequence();
+}
+});
+
+lane.addEventListener('click', function(event) {
+if (isDraggingTrackBlock || event.target.classList.contains('timeline-clip-track-block') || event.target.closest('.timeline-clip-track-block')) return;
+
+const bounds = lane.getBoundingClientRect();
+const mouseX = event.clientX - bounds.left;
+const percentX = (mouseX / bounds.width) * 100;
+
+isCurrentlyHoverSkimming = false;
+currentTimeOffsetSeconds = (percentX / 100) * (timelineDurationBoundsSeconds / globalTimelineVisualZoomScale);
+currentTimeOffsetSeconds = Math.max(0, Math.min(timelineDurationBoundsSeconds, currentTimeOffsetSeconds));
+
+updateTimelineUIMetrics();
+executeCompositingDrawingSequence();
+});
+});
+
+// Snapping: while dragging a clip (move or trim), pulls the edge being moved
+// to nearby landmarks (timeline start, the playhead, or any other clip's edges
+// across every track) when within a small pixel threshold, and shows a green
+// indicator line at the snapped position. Returns the possibly-snapped time.
+const SNAP_PIXEL_THRESHOLD = 8;
+function computeSnappedTime(proposedTime, excludeClipId, laneWidthPx) {
+const candidates = [0, currentTimeOffsetSeconds];
+Object.values(tracksRegistryMap).forEach(track => {
+track.forEach(c => {
+if (c.id === excludeClipId) return;
+candidates.push(c.timelineStartOffset, c.timelineStartOffset + c.duration);
+});
+});
+const pxPerSecond = (globalTimelineVisualZoomScale / timelineDurationBoundsSeconds) * laneWidthPx;
+let best = null, bestDist = SNAP_PIXEL_THRESHOLD;
+candidates.forEach(t => {
+const dist = Math.abs(proposedTime - t) * pxPerSecond;
+if (dist < bestDist) { bestDist = dist; best = t; }
+});
+const indicator = document.getElementById('timelineSnapIndicatorLine');
+if (best !== null) {
+indicator.style.display = 'block';
+indicator.style.left = `${(best / timelineDurationBoundsSeconds) * 100}%`;
+return best;
+} else {
+indicator.style.display = 'none';
+return proposedTime;
+}
+}
+function hideSnapIndicator() { document.getElementById('timelineSnapIndicatorLine').style.display = 'none'; }
+
+function handleBlockClickOrDragStart(e, clip) {
+e.stopPropagation();
+activeSelectedClipObject = clip;
+ensureClipTransformDefaults(clip);
+refreshTransformPanelForSelectedClip();
+
+const laneElement = document.getElementById('trackVideoLane');
+const bounds = laneElement.getBoundingClientRect();
+const mouseXOnLane = e.clientX - bounds.left;
+const percentX = (mouseXOnLane / bounds.width) * 100;
+
+isCurrentlyHoverSkimming = false;
+currentTimeOffsetSeconds = (percentX / 100) * (timelineDurationBoundsSeconds / globalTimelineVisualZoomScale);
+currentTimeOffsetSeconds = Math.max(0, Math.min(timelineDurationBoundsSeconds, currentTimeOffsetSeconds));
+
+updateTimelineUIMetrics();
+executeCompositingDrawingSequence();
+
+isDraggingTrackBlock = true;
+blockDragMouseStartX = e.clientX;
+blockDragInitialTimelineOffset = clip.timelineStartOffset;
+historySnapshotTakenForThisDrag = false;
+
+document.addEventListener('mousemove', handleBlockDragMove);
+document.addEventListener('mouseup', handleBlockDragEnd);
+
+document.querySelectorAll('.timeline-clip-track-block').forEach(b => b.classList.remove('selected-clip'));
+e.currentTarget.classList.add('selected-clip');
+}
+
+function handleBlockDragMove(e) {
+if (!isDraggingTrackBlock || !activeSelectedClipObject) return;
+const containerLane = document.getElementById('trackVideoLane');
+const bounds = containerLane.getBoundingClientRect();
+const deltaX = e.clientX - blockDragMouseStartX;
+
+if (Math.abs(deltaX) < 4) return;
+
+if (!historySnapshotTakenForThisDrag) { pushHistorySnapshot(); historySnapshotTakenForThisDrag = true; }
+const secondsDelta = (deltaX / bounds.width) * (timelineDurationBoundsSeconds / globalTimelineVisualZoomScale);
+let targetOffset = blockDragInitialTimelineOffset + secondsDelta;
+targetOffset = computeSnappedTime(targetOffset, activeSelectedClipObject.id, bounds.width);
+
+activeSelectedClipObject.timelineStartOffset = Math.max(0, Math.min(timelineDurationBoundsSeconds - activeSelectedClipObject.duration, targetOffset));
+
+const blockElement = document.querySelector(`.selected-clip`);
+if (blockElement) {
+blockElement.style.left = `${((activeSelectedClipObject.timelineStartOffset * globalTimelineVisualZoomScale) / timelineDurationBoundsSeconds) * 100}%`;
+}
+}
+
+function handleBlockDragEnd() {
+document.removeEventListener('mousemove', handleBlockDragMove);
+document.removeEventListener('mouseup', handleBlockDragEnd);
+setTimeout(() => { isDraggingTrackBlock = false; }, 50);
+hideSnapIndicator();
+rebuildVisualTrackLayoutLanes();
+executeCompositingDrawingSequence();
+}
+
+// --- Drag-to-trim directly on the timeline (left/right clip edges) ---------
+let trimEdgeClip = null, trimEdgeSide = null, trimEdgeStartMouseX = 0;
+let trimEdgeStartDuration = 0, trimEdgeStartTimelineOffset = 0, trimEdgeStartSourceOffset = 0;
+let historySnapshotTakenForEdgeTrim = false;
+
+function handleClipEdgeTrimStart(e, clip, side) {
+e.stopPropagation();
+activeSelectedClipObject = clip;
+refreshTransformPanelForSelectedClip();
+trimEdgeClip = clip;
+trimEdgeSide = side;
+trimEdgeStartMouseX = e.clientX;
+trimEdgeStartDuration = clip.duration;
+trimEdgeStartTimelineOffset = clip.timelineStartOffset;
+trimEdgeStartSourceOffset = clip.sourceStartOffset || 0;
+historySnapshotTakenForEdgeTrim = false;
+document.addEventListener('mousemove', handleClipEdgeTrimMove);
+document.addEventListener('mouseup', handleClipEdgeTrimEnd);
+}
+
+function handleClipEdgeTrimMove(e) {
+if (!trimEdgeClip) return;
+const bounds = document.getElementById('trackVideoLane').getBoundingClientRect();
+const deltaX = e.clientX - trimEdgeStartMouseX;
+if (Math.abs(deltaX) < 3) return;
+if (!historySnapshotTakenForEdgeTrim) { pushHistorySnapshot(); historySnapshotTakenForEdgeTrim = true; }
+
+const secondsDelta = (deltaX / bounds.width) * (timelineDurationBoundsSeconds / globalTimelineVisualZoomScale);
+const clip = trimEdgeClip;
+const hasSourceTrim = clip.originalDuration !== undefined; // video/audio can trim into their source; PiP/text just resize
+
+if (trimEdgeSide === 'right') {
+let proposedEnd = trimEdgeStartTimelineOffset + trimEdgeStartDuration + secondsDelta;
+proposedEnd = computeSnappedTime(proposedEnd, clip.id, bounds.width);
+let newDuration = proposedEnd - trimEdgeStartTimelineOffset;
+const maxDuration = hasSourceTrim ? (clip.originalDuration - trimEdgeStartSourceOffset) : Infinity;
+newDuration = Math.max(0.1, Math.min(maxDuration, newDuration));
+clip.duration = newDuration;
+} else {
+let proposedStart = trimEdgeStartTimelineOffset + secondsDelta;
+proposedStart = computeSnappedTime(proposedStart, clip.id, bounds.width);
+let shift = proposedStart - trimEdgeStartTimelineOffset;
+// Left edge can't push the clip's timeline start below 0, or (for
+// source-trimmed clips) before the start of the original source file.
+const minShift = hasSourceTrim ? -trimEdgeStartSourceOffset : -trimEdgeStartTimelineOffset;
+const maxShift = trimEdgeStartDuration - 0.1;
+shift = Math.max(minShift, Math.min(maxShift, shift));
+clip.timelineStartOffset = Math.max(0, trimEdgeStartTimelineOffset + shift);
+clip.duration = trimEdgeStartDuration - shift;
+if (hasSourceTrim) clip.sourceStartOffset = trimEdgeStartSourceOffset + shift;
+}
+rebuildVisualTrackLayoutLanes();
+executeCompositingDrawingSequence();
+}
+
+function handleClipEdgeTrimEnd() {
+document.removeEventListener('mousemove', handleClipEdgeTrimMove);
+document.removeEventListener('mouseup', handleClipEdgeTrimEnd);
+trimEdgeClip = null; trimEdgeSide = null;
+hideSnapIndicator();
+rebuildVisualTrackLayoutLanes();
+executeCompositingDrawingSequence();
+}
+
+function handleTrimDragStart(e, targetNode) {
+e.stopPropagation(); e.preventDefault();
+currentActiveDraggingNode = targetNode;
+dragStartMouseX = e.clientX;
+dragStartPercentLeft = currentTrimPercentStart;
+dragStartPercentRight = currentTrimPercentEnd;
+
+document.addEventListener('mousemove', executeTrimDragMovement);
+document.addEventListener('mouseup', completeTrimDragSequence);
+}
+
+function executeTrimDragMovement(e) {
+if (!currentActiveDraggingNode) return;
+const containerBounds = trimFilmstripTrackWrapper.getBoundingClientRect();
+const deltaX = e.clientX - dragStartMouseX;
+const deltaPercent = (deltaX / containerBounds.width) * 100;
+
+if (currentActiveDraggingNode === 'left') {
+currentTrimPercentStart = Math.max(0, Math.min(currentTrimPercentEnd - 2, dragStartPercentLeft + deltaPercent));
+} else if (currentActiveDraggingNode === 'right') {
+currentTrimPercentEnd = Math.max(currentTrimPercentStart + 2, Math.min(100, dragStartPercentRight + deltaPercent));
+}
+updateTrimSliderUIElements();
+}
+
+function completeTrimDragSequence() {
+document.removeEventListener('mousemove', executeTrimDragMovement);
+document.removeEventListener('mouseup', completeTrimDragSequence);
+currentActiveDraggingNode = null;
+}
+
+function updateTrimSliderUIElements() {
+trimSliderRange.style.left = `${currentTrimPercentStart}%`;
+trimSliderRange.style.width = `${currentTrimPercentEnd - currentTrimPercentStart}%`;
+const activeTrimDuration = ((currentTrimPercentEnd - currentTrimPercentStart) / 100) * originalClipMaxDuration;
+
+document.getElementById('trimModalTimeCounter').innerText = `Clip Total: ${formatTimeLayout(originalClipMaxDuration)}`;
+document.getElementById('trimModalIndexCounter').innerText = `Duration Selected: ${activeTrimDuration.toFixed(2)}s`;
+trimManualNumericInputBox.value = activeTrimDuration.toFixed(2);
+}
+
+function handleTrimManualInputExecution(event) {
+if (event.key === 'Enter') {
+const requestedValue = parseFloat(trimManualNumericInputBox.value);
+if (!isNaN(requestedValue) && requestedValue > 0 && requestedValue <= originalClipMaxDuration) {
+const percentageWidth = (requestedValue / originalClipMaxDuration) * 100;
+if (currentTrimPercentStart + percentageWidth <= 100) {
+currentTrimPercentEnd = currentTrimPercentStart + percentageWidth;
+} else {
+currentTrimPercentStart = 100 - percentageWidth;
+currentTrimPercentEnd = 100;
+}
+updateTrimSliderUIElements();
+}
+}
+}
+
+function setTrimIntervalScale(sec, btn) {
+document.querySelectorAll('.btn-interval-node').forEach(b => b.classList.remove('active-interval'));
+btn.classList.add('active-interval');
+if(sec === 0) { currentTrimPercentStart = 0; currentTrimPercentEnd = 100; }
+else {
+let percentChunk = (sec / originalClipMaxDuration) * 100;
+currentTrimPercentEnd = Math.min(100, currentTrimPercentStart + percentChunk);
+}
+updateTrimSliderUIElements();
+}
+
+function importVideoAsset(event) {
+const file = event.target.files[0]; if (!file) return;
+const v = document.createElement('video');
+v.setAttribute('playsinline', 'true');
+v.muted = true;
+v.preload = "auto";
+
+const fileURL = URL.createObjectURL(file);
+v.src = fileURL;
+
+document.getElementById('hiddenHardwareVideoCacheCage').appendChild(v);
+v.load();
+
+const updateLayoutHandler = () => {
+globalClipIdIncrementer++;
+// Previously this replaced tracksRegistryMap.video entirely, so importing
+// a second clip silently discarded the first one. Now clips are appended
+// one after another on the timeline instead.
+const appendAt = tracksRegistryMap.video.reduce((max, c) => Math.max(max, c.timelineStartOffset + c.duration), 0);
+const clip = {
+id: globalClipIdIncrementer,
+name: file.name,
+element: v,
+sourceFile: file,
+duration: v.duration || 10,
+originalDuration: v.duration || 10,
+sourceStartOffset: 0,
+timelineStartOffset: appendAt,
+type: 'video',
+width: v.videoWidth || 1920,
+height: v.videoHeight || 1080,
+canvasX: 0,
+canvasY: 0,
+canvasW: 1920,
+canvasH: 1080
+};
+ensureClipTransformDefaults(clip);
+elementRegistry[clip.id] = v;
+fileRegistry[clip.id] = file;
+pushHistorySnapshot();
+tracksRegistryMap.video.push(clip);
+timelineDurationBoundsSeconds = Math.max(timelineDurationBoundsSeconds === 300 && tracksRegistryMap.video.length === 1 ? 0 : timelineDurationBoundsSeconds, appendAt + (v.duration || 10));
+totalDurationLabel.innerText = formatTimeLayout(timelineDurationBoundsSeconds);
+rebuildVisualTrackLayoutLanes();
+if (tracksRegistryMap.video.length === 1) applyCanvasAspectConstraints();
+drawCleanSecondsTicksRuler();
+};
+v.onloadedmetadata = updateLayoutHandler;
+setTimeout(() => { if(tracksRegistryMap.video.length === 0) updateLayoutHandler(); }, 500);
+}
+
+function importPipAsset(event) {
+const file = event.target.files[0]; if (!file) return;
+const img = document.createElement('img'); img.src = URL.createObjectURL(file);
+img.onload = () => {
+globalClipIdIncrementer++;
+const clip = { id: globalClipIdIncrementer, name: file.name, element: img, sourceFile: file, duration: timelineDurationBoundsSeconds * 0.5, sourceStartOffset: 0, timelineStartOffset: 0, type: 'pip', canvasX: 200, canvasY: 200, canvasW: 400, canvasH: 400 };
+ensureClipTransformDefaults(clip);
+elementRegistry[clip.id] = img;
+fileRegistry[clip.id] = file;
+pushHistorySnapshot();
+tracksRegistryMap.pip.push(clip);
+rebuildVisualTrackLayoutLanes();
+};
+}
+
+function importAudioAsset(event, trackKey) {
+trackKey = trackKey || 'audio';
+const file = event.target.files[0]; if (!file) return;
+const a = document.createElement('audio'); a.src = URL.createObjectURL(file);
+document.getElementById('hiddenHardwareVideoCacheCage').appendChild(a);
+a.onloadedmetadata = () => {
+globalClipIdIncrementer++;
+const clip = { id: globalClipIdIncrementer, name: file.name, element: a, sourceFile: file, duration: a.duration, originalDuration: a.duration, sourceStartOffset: 0, timelineStartOffset: currentTimeOffsetSeconds, type: 'audio' };
+ensureClipTransformDefaults(clip);
+elementRegistry[clip.id] = a;
+fileRegistry[clip.id] = file;
+pushHistorySnapshot();
+tracksRegistryMap[trackKey].push(clip);
+rebuildVisualTrackLayoutLanes();
+decodeRealWaveformForClip(clip, file);
+};
+}
+
+// Real waveform extraction. Previously the "waveform" was Math.random() bars --
+// this decodes the actual audio samples and draws real amplitude peaks instead.
+function decodeRealWaveformForClip(clip, file) {
+const reader = new FileReader();
+reader.onload = () => {
+try {
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+audioCtx.decodeAudioData(reader.result.slice(0), (buffer) => {
+const raw = buffer.getChannelData(0);
+const samples = 200;
+const blockSize = Math.max(1, Math.floor(raw.length / samples));
+const peaks = new Float32Array(samples);
+for (let i = 0; i < samples; i++) {
+let sum = 0;
+for (let j = 0; j < blockSize; j++) sum += Math.abs(raw[i * blockSize + j] || 0);
+peaks[i] = sum / blockSize;
+}
+clip.waveformPeaks = Array.from(peaks);
+rebuildVisualTrackLayoutLanes();
+}, () => { /* decoding failed -- leave the flat placeholder line */ });
+} catch (e) { /* Web Audio unavailable -- leave the flat placeholder line */ }
+};
+reader.readAsArrayBuffer(file);
+}
+
+function rebuildVisualTrackLayoutLanes() {
+Object.keys(tracksRegistryMap).forEach(trackKey => {
+const container = document.getElementById(`${trackKey}ClipContainer`);
+if (!container) return; container.innerHTML = "";
+tracksRegistryMap[trackKey].forEach(clip => {
+const block = document.createElement('div');
+block.className = "timeline-clip-track-block";
+if (activeSelectedClipObject && activeSelectedClipObject.id === clip.id) block.classList.add('selected-clip');
+block.style.left = `${((clip.timelineStartOffset * globalTimelineVisualZoomScale) / timelineDurationBoundsSeconds) * 100}%`;
+block.style.width = `${((clip.duration * globalTimelineVisualZoomScale) / timelineDurationBoundsSeconds) * 100}%`;
+const label = document.createElement('div');
+label.className = 'clip-label-overlay-text'; label.innerText = clip.name;
+block.appendChild(label);
+if (trackKey === 'video') try { generateFilmstripForClip(clip, block); } catch(e) {}
+if (trackKey === 'audio' || trackKey === 'music2') {
+const waveCanvas = document.createElement('canvas'); waveCanvas.className = 'clip-waveform-canvas';
+block.appendChild(waveCanvas); drawWaveformForClip(waveCanvas, clip);
+}
+// Keyframe markers: previously keyframes were stored on the clip but
+// never drawn anywhere on the timeline itself, so there was no way to
+// see where they were. This places a small diamond on the clip block
+// at every keyframed time (deduped across posX/posY/scale/rotation
+// since Position keyframes are added to both tracks at once).
+if ((trackKey === 'video' || trackKey === 'pip') && clip.keyframes) {
+const times = new Set();
+Object.values(clip.keyframes).forEach(track => track.forEach(k => times.add(Math.round(k.time * 100) / 100)));
+times.forEach(kfTime => {
+const relPercent = ((kfTime - clip.timelineStartOffset) / clip.duration) * 100;
+if (relPercent < -1 || relPercent > 101) return;
+const marker = document.createElement('div');
+marker.className = 'clip-keyframe-marker';
+if (Math.abs(kfTime - currentTimeOffsetSeconds) < 0.05) marker.classList.add('on-playhead');
+marker.style.left = `${Math.max(0, Math.min(100, relPercent))}%`;
+marker.title = `Keyframe at ${kfTime.toFixed(2)}s (click to jump here)`;
+marker.addEventListener('mousedown', (e) => {
+e.stopPropagation();
+activeSelectedClipObject = clip;
+currentTimeOffsetSeconds = kfTime;
+updateTimelineUIMetrics();
+executeCompositingDrawingSequence();
+refreshTransformPanelForSelectedClip();
+});
+block.appendChild(marker);
+});
+}
+block.addEventListener('mousedown', (e) => handleBlockClickOrDragStart(e, clip));
+
+// Drag-to-trim handles: previously the only way to trim a clip was
+// the separate side panel. These let you grab either edge directly.
+const leftHandle = document.createElement('div');
+leftHandle.className = 'clip-edge-trim-handle edge-left';
+leftHandle.addEventListener('mousedown', (e) => handleClipEdgeTrimStart(e, clip, 'left'));
+block.appendChild(leftHandle);
+const rightHandle = document.createElement('div');
+rightHandle.className = 'clip-edge-trim-handle edge-right';
+rightHandle.addEventListener('mousedown', (e) => handleClipEdgeTrimStart(e, clip, 'right'));
+block.appendChild(rightHandle);
+
+container.appendChild(block);
+});
+});
+}
+
+function generateFilmstripForClip(clip, blockElement) {
+const filmstripLayer = document.createElement('div');
+filmstripLayer.className = 'clip-filmstrip-layer';
+blockElement.appendChild(filmstripLayer);
+const totalTilesToRender = 8;
+const workerCanvas = document.createElement('canvas');
+const workerContext = workerCanvas.getContext('2d');
+workerCanvas.width = 100; workerCanvas.height = 56;
+const peekStreamDecoder = document.createElement('video');
+peekStreamDecoder.src = clip.element.src; peekStreamDecoder.muted = true; peekStreamDecoder.preload = "auto";
+let loopIteratorIndex = 0;
+function processNextFrameExtractStep() {
+if (loopIteratorIndex >= totalTilesToRender) return;
+const tileFrameUnit = document.createElement('div');
+tileFrameUnit.className = 'filmstrip-frame-tile';
+tileFrameUnit.style.width = `${100 / totalTilesToRender}%`;
+filmstripLayer.appendChild(tileFrameUnit);
+peekStreamDecoder.currentTime = clip.sourceStartOffset + ((clip.duration / totalTilesToRender) * loopIteratorIndex);
+peekStreamDecoder.onseeked = () => {
+try { workerContext.drawImage(peekStreamDecoder, 0, 0, workerCanvas.width, workerCanvas.height); tileFrameUnit.style.backgroundImage = `url(${workerCanvas.toDataURL('image/jpeg', 0.5)})`; } catch (e) {}
+loopIteratorIndex++; processNextFrameExtractStep();
+};
+}
+peekStreamDecoder.onloadedmetadata = () => { processNextFrameExtractStep(); };
+}
+
+function drawWaveformForClip(canvas, clip) {
+const ctx = canvas.getContext('2d'); ctx.fillStyle = '#52ff7c'; ctx.clearRect(0, 0, canvas.width, canvas.height);
+if (clip.waveformPeaks && clip.waveformPeaks.length) {
+const peaks = clip.waveformPeaks;
+const barWidth = canvas.width / peaks.length;
+let maxPeak = 0.0001;
+for (let i = 0; i < peaks.length; i++) maxPeak = Math.max(maxPeak, peaks[i]);
+for (let i = 0; i < peaks.length; i++) {
+const h = Math.max(1, (peaks[i] / maxPeak) * canvas.height);
+ctx.fillRect(i * barWidth, (canvas.height - h) / 2, Math.max(1, barWidth - 1), h);
+}
+} else {
+// Still decoding real audio samples -- a flat line instead of fake noise.
+ctx.fillRect(0, canvas.height / 2 - 1, canvas.width, 2);
+}
+}
+
+function executeCompositingDrawingSequence() {
+canvasGraphicContext.clearRect(0, 0, mainRenderCanvas.width, mainRenderCanvas.height);
+downsampleBufferCtx.clearRect(0, 0, downsampleBufferCanvas.width, downsampleBufferCanvas.height);
+const centerX = mainRenderCanvas.width / 2; const centerY = mainRenderCanvas.height / 2;
+const timeContext = isCurrentlyHoverSkimming ? hoverSkimTimeTargetSeconds : currentTimeOffsetSeconds;
+let videoClipRendered = false;
+let targetVideoElement = null;
+// Transition support: detect if the playhead sits inside the last
+// TRANSITION_DURATION_SECONDS of a clip that is immediately followed by
+// another clip on the timeline, so the two can be blended per activeTransitionMode.
+const sortedVideoClips = [...tracksRegistryMap.video].sort((a, b) => a.timelineStartOffset - b.timelineStartOffset);
+let transitionActive = false, transitionProgress = 0, incomingClip = null;
+const primaryClip = sortedVideoClips.find(c => timeContext >= c.timelineStartOffset && timeContext <= (c.timelineStartOffset + c.duration));
+if (primaryClip) ensureClipTransformDefaults(primaryClip);
+if (primaryClip && activeTransitionMode !== 'none') {
+const idx = sortedVideoClips.indexOf(primaryClip);
+const nextClip = sortedVideoClips[idx + 1];
+const clipEnd = primaryClip.timelineStartOffset + primaryClip.duration;
+if (nextClip && Math.abs(nextClip.timelineStartOffset - clipEnd) < 0.05 && timeContext >= clipEnd - TRANSITION_DURATION_SECONDS) {
+transitionActive = true;
+incomingClip = nextClip;
+transitionProgress = Math.min(1, Math.max(0, (timeContext - (clipEnd - TRANSITION_DURATION_SECONDS)) / TRANSITION_DURATION_SECONDS));
+}
+}
+tracksRegistryMap.video.forEach(clip => {
+const isPrimary = clip === primaryClip;
+const isTransitionPartner = clip === incomingClip;
+if (isPrimary || isTransitionPartner) {
+const offset = ((timeContext - clip.timelineStartOffset) * currentTimeWarpVelocity) + clip.sourceStartOffset;
+const syncThreshold = masterSlowMoActiveToggle ? 0.35 : 0.15;
+if (Math.abs(clip.element.currentTime - offset) > syncThreshold) clip.element.currentTime = offset;
+ensureClipTransformDefaults(clip);
+clip.element.volume = Math.max(0, Math.min(1, getClipPropertyValueAtTime(clip, 'volume', 'volumeValue', timeContext) / 100));
+if (playbackEngineRunning && !isCurrentlyHoverSkimming && clip.element.paused) clip.element.play().catch(() => {});
+else if ((!playbackEngineRunning || isCurrentlyHoverSkimming) && !clip.element.paused) clip.element.pause();
+if (isPrimary && clip.element.readyState >= 1) { videoClipRendered = true; targetVideoElement = clip.element; }
+} else { if (clip.element && !clip.element.paused) clip.element.pause(); }
+});
+if (transitionActive && incomingClip && incomingClip.element.readyState >= 1) {
+ensureClipTransformDefaults(incomingClip);
+transitionIncomingBufferCtx.clearRect(0, 0, transitionIncomingBufferCanvas.width, transitionIncomingBufferCanvas.height);
+transitionIncomingBufferCtx.drawImage(incomingClip.element, 0, 0, transitionIncomingBufferCanvas.width, transitionIncomingBufferCanvas.height);
+} else {
+transitionActive = false;
+}
+if (videoClipRendered && targetVideoElement) {
+const c = primaryClip.crop;
+const vw = targetVideoElement.videoWidth || downsampleBufferCanvas.width;
+const vh = targetVideoElement.videoHeight || downsampleBufferCanvas.height;
+const cropNorm = {
+x: c.left / 100, y: c.top / 100,
+w: Math.max(0.01, 1 - c.left / 100 - c.right / 100),
+h: Math.max(0.01, 1 - c.top / 100 - c.bottom / 100)
+};
+
+// Prefer the GPU (WebGL) pipeline -- handles crop, chroma key, AI mask,
+// color filter, and mosaic in one shader pass, which is what makes the
+// higher internal buffer resolution (see resizeInternalBuffers) fast.
+// Falls back automatically to the original CPU pixel-loop path below if
+// WebGL isn't available, or a shader failed to compile/run.
+const usedWebGL = renderFilterPipelineWebGL(targetVideoElement, cropNorm, downsampleBufferCanvas.width, downsampleBufferCanvas.height);
+if (usedWebGL) {
+downsampleBufferCtx.clearRect(0, 0, downsampleBufferCanvas.width, downsampleBufferCanvas.height);
+downsampleBufferCtx.drawImage(glCanvas, 0, 0);
+} else {
+// Crop: draw only the cropped source rectangle instead of the full frame.
+const sx = vw * cropNorm.x, sy = vh * cropNorm.y;
+const sw = Math.max(1, vw * cropNorm.w), sh = Math.max(1, vh * cropNorm.h);
+downsampleBufferCtx.drawImage(targetVideoElement, sx, sy, sw, sh, 0, 0, downsampleBufferCanvas.width, downsampleBufferCanvas.height);
+
+// Real chroma key: removes pixels close to the chosen key color, with a
+// soft-edge falloff band, instead of the old version's decorative border.
+if (chromaKeyAlphaActive) applyChromaKeyToBuffer();
+// AI (ML-based) background removal: zeroes alpha wherever the last
+// computed segmentation mask says "not a person". See runAiSegmentationLoop.
+if (aiBgRemovalActive && aiBgLastMaskData) applyAiMaskToBuffer();
+
+if (currentActiveFilterLutToken !== 'none') applyColorFilterToBuffer(currentActiveFilterLutToken);
+if (mosaicActive) applyMosaicToBuffer(10);
+}
+}
+canvasGraphicContext.save();
+canvasGraphicContext.translate(centerX, centerY);
+canvasGraphicContext.rotate((transformRotationStateDegrees * Math.PI) / 180);
+// Mirror/Flip toggles existed as buttons but were never read anywhere --
+// now they actually scale the canvas by -1 on the relevant axis.
+canvasGraphicContext.scale(
+parseFloat(zoomSliderElement.value) * (horizontalMirrorActive ? -1 : 1),
+parseFloat(zoomSliderElement.value) * (verticalFlipActive ? -1 : 1)
+);
+canvasGraphicContext.translate(-centerX, -centerY);
+const baseAlpha = parseFloat(document.getElementById('engineOpacity').value);
+canvasGraphicContext.globalAlpha = baseAlpha;
+const blurPx = parseFloat(document.getElementById('engineBlur').value);
+canvasGraphicContext.filter = (blurPx > 0 ? `blur(${blurPx}px) ` : '') + (neonGlowActive ? 'brightness(1.15) saturate(1.4) drop-shadow(0 0 18px rgba(255,188,0,0.65))' : '');
+if (videoClipRendered) {
+if (transitionActive) {
+// Per-clip Transform/Blend/Mask/Keyframes apply to normal single-clip
+// playback; during an active transition the two clips are blended by
+// renderTransitionBlend instead, to keep that logic dependable.
+let cutawayEl = null;
+if (activeTransitionMode === 'cutaway') {
+const activePip = tracksRegistryMap.pip.find(p => timeContext >= p.timelineStartOffset && timeContext <= p.timelineStartOffset + p.duration);
+cutawayEl = activePip ? activePip.element : null;
+}
+renderTransitionBlend(activeTransitionMode, transitionProgress, baseAlpha, cutawayEl);
+} else {
+drawClipWithFullPipeline(canvasGraphicContext, downsampleBufferCanvas, 0, 0, mainRenderCanvas.width, mainRenderCanvas.height, primaryClip, timeContext, baseAlpha);
+}
+}
+canvasGraphicContext.filter = 'none';
+canvasGraphicContext.globalAlpha = 1;
+canvasGraphicContext.restore();
+
+// PiP overlay clips were pushed into tracksRegistryMap.pip on import but
+// were never actually drawn onto the canvas anywhere -- the overlay track
+// was purely cosmetic. Now active overlays render with their own
+// Transform/Blend/Mask pipeline, same as the primary video.
+tracksRegistryMap.pip.forEach(pipClip => {
+if (timeContext >= pipClip.timelineStartOffset && timeContext <= (pipClip.timelineStartOffset + pipClip.duration) && pipClip.element) {
+ensureClipTransformDefaults(pipClip);
+drawClipWithFullPipeline(canvasGraphicContext, pipClip.element, pipClip.canvasX, pipClip.canvasY, pipClip.canvasW, pipClip.canvasH, pipClip, timeContext, 1);
+}
+});
+
+tracksRegistryMap.text.forEach(textClip => {
+if (timeContext >= textClip.timelineStartOffset && timeContext <= (textClip.timelineStartOffset + textClip.duration)) {
+drawTextClip(canvasGraphicContext, textClip, timeContext);
+}
+});
+
+if (vignetteFocusActive) {
+const grad = canvasGraphicContext.createRadialGradient(centerX, centerY, mainRenderCanvas.height * 0.25, centerX, centerY, mainRenderCanvas.height * 0.75);
+grad.addColorStop(0, 'rgba(0,0,0,0)');
+grad.addColorStop(1, 'rgba(0,0,0,0.65)');
+canvasGraphicContext.fillStyle = grad;
+canvasGraphicContext.fillRect(0, 0, mainRenderCanvas.width, mainRenderCanvas.height);
+}
+if (borderFrameActive) {
+canvasGraphicContext.strokeStyle = '#ffffff';
+canvasGraphicContext.lineWidth = Math.max(4, mainRenderCanvas.width * 0.01);
+canvasGraphicContext.strokeRect(canvasGraphicContext.lineWidth / 2, canvasGraphicContext.lineWidth / 2, mainRenderCanvas.width - canvasGraphicContext.lineWidth, mainRenderCanvas.height - canvasGraphicContext.lineWidth);
+}
+if (trackingEngineActive && videoClipRendered) {
+// Real motion tracking via frame-differencing (see updateMotionTrackerPosition)
+// instead of a static box glued to the center of frame.
+updateMotionTrackerPosition(downsampleBufferCanvas);
+const tx = (trackerSmoothX === null ? 0.5 : trackerSmoothX) * mainRenderCanvas.width;
+const ty = (trackerSmoothY === null ? 0.5 : trackerSmoothY) * mainRenderCanvas.height;
+canvasGraphicContext.strokeStyle = '#ffbc00';
+canvasGraphicContext.lineWidth = 3;
+const boxSize = mainRenderCanvas.width * 0.18;
+canvasGraphicContext.strokeRect(tx - boxSize / 2, ty - boxSize / 2, boxSize, boxSize);
+}
+}
+
+// Lightweight motion tracker: downsamples the current frame to a tiny 32x18
+// grayscale buffer, compares it against the previous frame, and finds the
+// motion-weighted centroid of pixels that changed significantly. Smoothed with
+// an exponential moving average to avoid jitter. This is frame-differencing,
+// not object recognition -- it follows whatever is moving in frame, not a
+// specific chosen subject, and works best with one clearly moving thing on an
+// otherwise fairly static background.
+let trackerPrevFrameGray = null;
+let trackerSmoothX = null, trackerSmoothY = null;
+const trackerScratchCanvas = document.createElement('canvas');
+trackerScratchCanvas.width = 32; trackerScratchCanvas.height = 18;
+const trackerScratchCtx = trackerScratchCanvas.getContext('2d');
+
+function updateMotionTrackerPosition(sourceCanvas) {
+try {
+trackerScratchCtx.drawImage(sourceCanvas, 0, 0, 32, 18);
+const frame = trackerScratchCtx.getImageData(0, 0, 32, 18).data;
+const gray = new Float32Array(32 * 18);
+for (let i = 0, p = 0; i < frame.length; i += 4, p++) {
+gray[p] = 0.2126 * frame[i] + 0.7152 * frame[i + 1] + 0.0722 * frame[i + 2];
+}
+if (trackerPrevFrameGray) {
+let sumX = 0, sumY = 0, weight = 0;
+for (let y = 0; y < 18; y++) {
+for (let x = 0; x < 32; x++) {
+const idx = y * 32 + x;
+const diff = Math.abs(gray[idx] - trackerPrevFrameGray[idx]);
+if (diff > 18) { sumX += x * diff; sumY += y * diff; weight += diff; }
+}
+}
+if (weight > 0) {
+const targetX = (sumX / weight) / 32, targetY = (sumY / weight) / 18;
+trackerSmoothX = trackerSmoothX === null ? targetX : trackerSmoothX * 0.8 + targetX * 0.2;
+trackerSmoothY = trackerSmoothY === null ? targetY : trackerSmoothY * 0.8 + targetY * 0.2;
+}
+}
+trackerPrevFrameGray = gray;
+} catch (e) { /* leave tracker at its last known position on failure */ }
+}
+
+// --- Per-clip Transform / Keyframes / Blend / Mask support -----------------
+
+function ensureClipTransformDefaults(clip) {
+if (clip.posX === undefined) clip.posX = 0;
+if (clip.posY === undefined) clip.posY = 0;
+if (clip.scaleValue === undefined) clip.scaleValue = 100;
+if (clip.rotationDeg === undefined) clip.rotationDeg = 0;
+if (clip.volumeValue === undefined) clip.volumeValue = 100;
+if (!clip.keyframes) clip.keyframes = { posX: [], posY: [], scale: [], rotation: [], volume: [] };
+if (!clip.keyframes.volume) clip.keyframes.volume = [];
+if (clip.blendMode === undefined) clip.blendMode = 'source-over';
+if (!clip.crop) clip.crop = { left: 0, top: 0, right: 0, bottom: 0 };
+if (!clip.mask) clip.mask = { type: 'none' };
+}
+
+function getClipPropertyValueAtTime(clip, track, baseFieldName, time) {
+const kfs = clip.keyframes && clip.keyframes[track];
+if (!kfs || kfs.length === 0) return clip[baseFieldName];
+if (kfs.length === 1) return kfs[0].value;
+const sorted = [...kfs].sort((a, b) => a.time - b.time);
+if (time <= sorted[0].time) return sorted[0].value;
+if (time >= sorted[sorted.length - 1].time) return sorted[sorted.length - 1].value;
+for (let i = 0; i < sorted.length - 1; i++) {
+const a = sorted[i], b = sorted[i + 1];
+if (time >= a.time && time <= b.time) {
+const t = (time - a.time) / ((b.time - a.time) || 1);
+return a.value + (b.value - a.value) * t;
+}
+}
+return clip[baseFieldName];
+}
+
+// Draws one clip (video buffer or PiP image) into destX/Y/W/H on the target
+// context, applying that clip's keyframed Position/Scale/Rotation, its Blend
+// mode, and its Mask shape (Rectangle/Circle). This is the shared pipeline used
+// by both the primary video track and every PiP overlay.
+function drawClipWithFullPipeline(ctx, source, destX, destY, destW, destH, clip, timeContext, extraAlpha) {
+const posX = getClipPropertyValueAtTime(clip, 'posX', 'posX', timeContext);
+const posY = getClipPropertyValueAtTime(clip, 'posY', 'posY', timeContext);
+const scalePct = getClipPropertyValueAtTime(clip, 'scale', 'scaleValue', timeContext);
+const rotDeg = getClipPropertyValueAtTime(clip, 'rotation', 'rotationDeg', timeContext);
+const scaleFactor = (isFinite(scalePct) ? scalePct : 100) / 100;
+
+const cx = destX + destW / 2 + posX;
+const cy = destY + destH / 2 + posY;
+
+ctx.save();
+ctx.globalCompositeOperation = clip.blendMode || 'source-over';
+ctx.globalAlpha = (extraAlpha === undefined ? 1 : extraAlpha);
+ctx.translate(cx, cy);
+ctx.rotate((rotDeg * Math.PI) / 180);
+ctx.scale(scaleFactor, scaleFactor);
+ctx.translate(-destW / 2, -destH / 2);
+
+if (clip.mask && clip.mask.type === 'rect') {
+ctx.beginPath(); ctx.rect(0, 0, destW, destH); ctx.clip();
+} else if (clip.mask && clip.mask.type === 'circle') {
+ctx.beginPath(); ctx.ellipse(destW / 2, destH / 2, destW / 2, destH / 2, 0, 0, Math.PI * 2); ctx.clip();
+}
+
+ctx.drawImage(source, 0, 0, destW, destH);
+ctx.restore();
+}
+
+function refreshTransformPanelForSelectedClip() {
+const clip = activeSelectedClipObject;
+const ids = ['xformPosX', 'xformPosY', 'xformScale', 'xformRotation', 'xformBlendMode', 'cropLeft', 'cropTop', 'cropRight', 'cropBottom', 'xformMaskType'];
+ids.forEach(id => { document.getElementById(id).disabled = !clip; });
+const isAudibleClip = clip && (clip.type === 'video' || clip.type === 'audio');
+document.getElementById('xformVolume').disabled = !isAudibleClip;
+document.getElementById('kfBtn-volume').disabled = !isAudibleClip;
+const isTextClip = clip && clip.type === 'text';
+document.getElementById('textContentInput').disabled = !isTextClip;
+document.getElementById('textFontSize').disabled = !isTextClip;
+document.getElementById('textColorPicker').disabled = !isTextClip;
+if (!clip) return;
+ensureClipTransformDefaults(clip);
+const t = currentTimeOffsetSeconds;
+const focused = document.activeElement;
+const setIfNotFocused = (id, value) => { const el = document.getElementById(id); if (el !== focused) el.value = value; };
+setIfNotFocused('xformPosX', Math.round(getClipPropertyValueAtTime(clip, 'posX', 'posX', t)));
+setIfNotFocused('xformPosY', Math.round(getClipPropertyValueAtTime(clip, 'posY', 'posY', t)));
+setIfNotFocused('xformScale', Math.round(getClipPropertyValueAtTime(clip, 'scale', 'scaleValue', t)));
+setIfNotFocused('xformRotation', Math.round(getClipPropertyValueAtTime(clip, 'rotation', 'rotationDeg', t)));
+if (isAudibleClip) setIfNotFocused('xformVolume', Math.round(getClipPropertyValueAtTime(clip, 'volume', 'volumeValue', t)));
+if (document.getElementById('xformBlendMode') !== focused) document.getElementById('xformBlendMode').value = clip.blendMode;
+setIfNotFocused('cropLeft', clip.crop.left);
+setIfNotFocused('cropTop', clip.crop.top);
+setIfNotFocused('cropRight', clip.crop.right);
+setIfNotFocused('cropBottom', clip.crop.bottom);
+if (document.getElementById('xformMaskType') !== focused) document.getElementById('xformMaskType').value = clip.mask.type;
+if (isTextClip) {
+setIfNotFocused('textContentInput', clip.text);
+setIfNotFocused('textFontSize', clip.fontSize);
+if (document.getElementById('textColorPicker') !== focused) document.getElementById('textColorPicker').value = clip.color;
+}
+['posX', 'scale', 'rotation', 'volume'].forEach(p => {
+const btn = document.getElementById('kfBtn-' + p);
+const kfs = clip.keyframes[p] || [];
+btn.classList.toggle('has-keyframes', kfs.length > 0);
+btn.classList.toggle('on-keyframe', kfs.some(k => Math.abs(k.time - t) < 0.05));
+});
+}
+
+function addTextClip() {
+const content = prompt("Enter text for the overlay:", "Sample Text");
+if (content === null || content.trim() === '') return;
+globalClipIdIncrementer++;
+const clip = {
+id: globalClipIdIncrementer,
+name: content,
+text: content,
+fontSize: 64,
+color: '#ffffff',
+duration: 3,
+timelineStartOffset: currentTimeOffsetSeconds,
+type: 'text'
+};
+ensureClipTransformDefaults(clip);
+pushHistorySnapshot();
+tracksRegistryMap.text.push(clip);
+// Bug: this clip was never selected after creation, so the Content/Size/
+// Color/Position fields kept editing whatever was selected before (or
+// nothing) instead of the new text clip -- looked like those controls
+// just didn't work. Selecting it here, before the rebuild, also makes the
+// rebuild highlight its block on the timeline (rebuildVisualTrackLayoutLanes
+// already checks activeSelectedClipObject.id against each clip).
+activeSelectedClipObject = clip;
+rebuildVisualTrackLayoutLanes();
+refreshTransformPanelForSelectedClip();
+executeCompositingDrawingSequence();
+showNotificationAlert("Text clip added and selected -- edit it in the Text panel.");
+const contentField = document.getElementById('textContentInput');
+if (contentField) { contentField.focus(); contentField.select(); }
+}
+
+function handleTextContentChange() {
+const clip = activeSelectedClipObject;
+if (!clip || clip.type !== 'text') return;
+pushHistorySnapshot();
+clip.text = document.getElementById('textContentInput').value;
+clip.name = clip.text || '(empty text)';
+rebuildVisualTrackLayoutLanes();
+executeCompositingDrawingSequence();
+}
+
+function handleTextStyleChange() {
+const clip = activeSelectedClipObject;
+if (!clip || clip.type !== 'text') return;
+pushHistorySnapshot();
+clip.fontSize = parseFloat(document.getElementById('textFontSize').value) || 64;
+clip.color = document.getElementById('textColorPicker').value;
+executeCompositingDrawingSequence();
+}
+
+// Draws a text overlay clip using the same keyframed Position/Scale/Rotation
+// pipeline as video/PiP clips, just with fillText instead of drawImage.
+function drawTextClip(ctx, textClip, timeContext) {
+ensureClipTransformDefaults(textClip);
+const posX = getClipPropertyValueAtTime(textClip, 'posX', 'posX', timeContext);
+const posY = getClipPropertyValueAtTime(textClip, 'posY', 'posY', timeContext);
+const scalePct = getClipPropertyValueAtTime(textClip, 'scale', 'scaleValue', timeContext);
+const rotDeg = getClipPropertyValueAtTime(textClip, 'rotation', 'rotationDeg', timeContext);
+const scaleFactor = (isFinite(scalePct) ? scalePct : 100) / 100;
+const cx = ctx.canvas.width / 2 + posX;
+const cy = ctx.canvas.height / 2 + posY;
+
+ctx.save();
+ctx.globalCompositeOperation = textClip.blendMode || 'source-over';
+ctx.translate(cx, cy);
+ctx.rotate((rotDeg * Math.PI) / 180);
+ctx.scale(scaleFactor, scaleFactor);
+ctx.font = `bold ${textClip.fontSize}px -apple-system, sans-serif`;
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+ctx.lineWidth = Math.max(2, textClip.fontSize * 0.06);
+ctx.strokeStyle = 'rgba(0,0,0,0.75)';
+ctx.strokeText(textClip.text, 0, 0);
+ctx.fillStyle = textClip.color;
+ctx.fillText(textClip.text, 0, 0);
+ctx.restore();
+}
+
+const TRANSFORM_FIELD_MAP = {
+posX: { input: 'xformPosX', base: 'posX', track: 'posX' },
+posY: { input: 'xformPosY', base: 'posY', track: 'posY' },
+scale: { input: 'xformScale', base: 'scaleValue', track: 'scale' },
+rotation: { input: 'xformRotation', base: 'rotationDeg', track: 'rotation' },
+volume: { input: 'xformVolume', base: 'volumeValue', track: 'volume' }
+};
+
+function handleTransformFieldChange(prop) {
+const clip = activeSelectedClipObject;
+if (!clip) return;
+ensureClipTransformDefaults(clip);
+pushHistorySnapshot();
+const map = TRANSFORM_FIELD_MAP[prop];
+const value = parseFloat(document.getElementById(map.input).value) || 0;
+clip[map.base] = value;
+const t = currentTimeOffsetSeconds;
+const kfs = clip.keyframes[map.track];
+const existing = kfs && kfs.find(k => Math.abs(k.time - t) < 0.05);
+if (existing) existing.value = value;
+executeCompositingDrawingSequence();
+}
+
+// ◆ button: adds a keyframe for that property at the current playhead time on
+// the selected clip using the field's current value, or removes one that
+// already exists at (near) this exact time. Two or more keyframes on a track
+// makes the value animate between them during playback instead of staying static.
+function toggleKeyframeAtPlayhead(prop) {
+const clip = activeSelectedClipObject;
+if (!clip) { showNotificationAlert("Select a clip first!"); return; }
+ensureClipTransformDefaults(clip);
+pushHistorySnapshot();
+const t = currentTimeOffsetSeconds;
+if (prop === 'posX') {
+toggleKeyframeForTrack(clip, 'posX', t, parseFloat(document.getElementById('xformPosX').value) || 0);
+toggleKeyframeForTrack(clip, 'posY', t, parseFloat(document.getElementById('xformPosY').value) || 0);
+} else {
+const map = TRANSFORM_FIELD_MAP[prop];
+toggleKeyframeForTrack(clip, map.track, t, parseFloat(document.getElementById(map.input).value) || 0);
+}
+refreshTransformPanelForSelectedClip();
+rebuildVisualTrackLayoutLanes();
+executeCompositingDrawingSequence();
+}
+
+function toggleKeyframeForTrack(clip, track, time, value) {
+const kfs = clip.keyframes[track];
+const idx = kfs.findIndex(k => Math.abs(k.time - time) < 0.05);
+if (idx >= 0) { kfs.splice(idx, 1); showNotificationAlert(`Removed ${track} keyframe`); }
+else { kfs.push({ time, value }); showNotificationAlert(`Added ${track} keyframe at ${time.toFixed(2)}s`); }
+}
+
+function jumpToKeyframe(prop, direction) {
+const clip = activeSelectedClipObject;
+if (!clip) { showNotificationAlert("Select a clip first!"); return; }
+ensureClipTransformDefaults(clip);
+const kfs = clip.keyframes[prop];
+if (!kfs || kfs.length === 0) { showNotificationAlert("No keyframes on this property yet."); return; }
+const sorted = [...kfs].sort((a, b) => a.time - b.time);
+const t = currentTimeOffsetSeconds;
+const target = direction < 0 ? [...sorted].reverse().find(k => k.time < t - 0.01) : sorted.find(k => k.time > t + 0.01);
+if (!target) { showNotificationAlert("No more keyframes that direction."); return; }
+currentTimeOffsetSeconds = target.time;
+updateTimelineUIMetrics();
+rebuildVisualTrackLayoutLanes();
+executeCompositingDrawingSequence();
+}
+
+function handleBlendModeChange() {
+const clip = activeSelectedClipObject;
+if (!clip) return;
+ensureClipTransformDefaults(clip);
+pushHistorySnapshot();
+clip.blendMode = document.getElementById('xformBlendMode').value;
+executeCompositingDrawingSequence();
+}
+
+function handleCropFieldChange() {
+const clip = activeSelectedClipObject;
+if (!clip) return;
+ensureClipTransformDefaults(clip);
+pushHistorySnapshot();
+const clamp = v => Math.max(0, Math.min(90, parseFloat(v) || 0));
+clip.crop.left = clamp(document.getElementById('cropLeft').value);
+clip.crop.top = clamp(document.getElementById('cropTop').value);
+clip.crop.right = clamp(document.getElementById('cropRight').value);
+clip.crop.bottom = clamp(document.getElementById('cropBottom').value);
+executeCompositingDrawingSequence();
+}
+
+function handleMaskChange() {
+const clip = activeSelectedClipObject;
+if (!clip) return;
+ensureClipTransformDefaults(clip);
+pushHistorySnapshot();
+clip.mask.type = document.getElementById('xformMaskType').value;
+executeCompositingDrawingSequence();
+}
+
+// --- Real chroma key + AI mask pixel operations -----------------------------
+
+// --- WebGL filter pipeline (GPU) --------------------------------------------
+// Runs chroma key, AI mask, color filters, and mosaic as a single-pass GLSL
+// shader instead of JavaScript getImageData/putImageData pixel loops. This is
+// what makes the higher internal resolution (see resizeInternalBuffers) fast
+// enough to use. If WebGL is unavailable, or shader compile/link fails, or a
+// draw call throws at runtime, this silently disables itself and
+// executeCompositingDrawingSequence automatically falls back to the original
+// CPU pixel-loop functions below -- the app keeps working either way.
+let glCanvas = null, gl = null, glProgram = null;
+let glVideoTexture = null, glMaskTexture = null, glPositionBuffer = null;
+let glUniforms = {};
+let glSupported = false;
+let aiBgLastMaskWidth = 0, aiBgLastMaskHeight = 0;
+
+const GL_VERTEX_SHADER_SRC = `
+attribute vec2 aPosition;
+varying vec2 vUV;
+void main() {
+vUV = aPosition * 0.5 + 0.5;
+gl_Position = vec4(aPosition, 0.0, 1.0);
+}
+`;
+
+const GL_FRAGMENT_SHADER_SRC = `
+precision mediump float;
+varying vec2 vUV;
+uniform sampler2D uVideoTexture;
+uniform sampler2D uMaskTexture;
+uniform vec4 uCropRect;
+uniform bool uMosaicEnabled;
+uniform float uMosaicBlocks;
+uniform bool uChromaKeyEnabled;
+uniform vec3 uChromaKeyColor;
+uniform float uChromaKeyThreshold;
+uniform bool uAiMaskEnabled;
+uniform bool uGrayscale;
+uniform vec3 uColorMul;
+uniform vec3 uColorAdd;
+uniform bool uNoiseEnabled;
+uniform float uNoiseSeed;
+
+float rand(vec2 co) { return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453); }
+
+void main() {
+vec2 sampleUV = vUV;
+if (uMosaicEnabled) {
+sampleUV = floor(vUV * uMosaicBlocks) / uMosaicBlocks;
+}
+vec2 uv = uCropRect.xy + sampleUV * uCropRect.zw;
+vec4 color = texture2D(uVideoTexture, uv);
+float alpha = color.a;
+
+if (uChromaKeyEnabled) {
+float dist = distance(color.rgb * 255.0, uChromaKeyColor);
+if (dist < uChromaKeyThreshold) alpha = 0.0;
+else if (dist < uChromaKeyThreshold * 1.6) alpha = (dist - uChromaKeyThreshold) / (uChromaKeyThreshold * 0.6);
+}
+if (uAiMaskEnabled) {
+float maskVal = texture2D(uMaskTexture, uv).r;
+if (maskVal < 0.5) alpha = 0.0;
+}
+
+vec3 rgb = color.rgb * 255.0;
+if (uGrayscale) {
+float v = dot(rgb, vec3(0.2126, 0.7152, 0.0722));
+rgb = vec3(v);
+} else {
+rgb = rgb * uColorMul + uColorAdd;
+}
+if (uNoiseEnabled) {
+float n = (rand(vUV * uNoiseSeed) - 0.5) * 40.0;
+rgb += vec3(n);
+}
+rgb = clamp(rgb, 0.0, 255.0);
+gl_FragColor = vec4(rgb / 255.0, alpha);
+}
+`;
+
+function initWebGLPipeline() {
+try {
+glCanvas = document.getElementById('webglFilterCanvas');
+gl = glCanvas.getContext('webgl', { premultipliedAlpha: false }) || glCanvas.getContext('experimental-webgl', { premultipliedAlpha: false });
+if (!gl) throw new Error('WebGL context unavailable on this device/browser');
+
+function compileShader(type, source) {
+const shader = gl.createShader(type);
+gl.shaderSource(shader, source);
+gl.compileShader(shader);
+if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+const info = gl.getShaderInfoLog(shader);
+gl.deleteShader(shader);
+throw new Error('Shader compile error: ' + info);
+}
+return shader;
+}
+
+const vs = compileShader(gl.VERTEX_SHADER, GL_VERTEX_SHADER_SRC);
+const fs = compileShader(gl.FRAGMENT_SHADER, GL_FRAGMENT_SHADER_SRC);
+glProgram = gl.createProgram();
+gl.attachShader(glProgram, vs);
+gl.attachShader(glProgram, fs);
+gl.linkProgram(glProgram);
+if (!gl.getProgramParameter(glProgram, gl.LINK_STATUS)) {
+throw new Error('Program link error: ' + gl.getProgramInfoLog(glProgram));
+}
+
+glPositionBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, glPositionBuffer);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+
+glVideoTexture = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, glVideoTexture);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+glMaskTexture = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, glMaskTexture);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+glUniforms = {
+position: gl.getAttribLocation(glProgram, 'aPosition'),
+videoTexture: gl.getUniformLocation(glProgram, 'uVideoTexture'),
+maskTexture: gl.getUniformLocation(glProgram, 'uMaskTexture'),
+cropRect: gl.getUniformLocation(glProgram, 'uCropRect'),
+mosaicEnabled: gl.getUniformLocation(glProgram, 'uMosaicEnabled'),
+mosaicBlocks: gl.getUniformLocation(glProgram, 'uMosaicBlocks'),
+chromaKeyEnabled: gl.getUniformLocation(glProgram, 'uChromaKeyEnabled'),
+chromaKeyColor: gl.getUniformLocation(glProgram, 'uChromaKeyColor'),
+chromaKeyThreshold: gl.getUniformLocation(glProgram, 'uChromaKeyThreshold'),
+aiMaskEnabled: gl.getUniformLocation(glProgram, 'uAiMaskEnabled'),
+grayscale: gl.getUniformLocation(glProgram, 'uGrayscale'),
+colorMul: gl.getUniformLocation(glProgram, 'uColorMul'),
+colorAdd: gl.getUniformLocation(glProgram, 'uColorAdd'),
+noiseEnabled: gl.getUniformLocation(glProgram, 'uNoiseEnabled'),
+noiseSeed: gl.getUniformLocation(glProgram, 'uNoiseSeed')
+};
+
+glSupported = true;
+console.log('WebGL filter pipeline ready.');
+} catch (e) {
+glSupported = false;
+console.warn('WebGL pipeline unavailable, using CPU pixel-loop fallback instead:', e.message);
+}
+}
+initWebGLPipeline();
+
+// Mirrors applyColorFilterToBuffer's per-name branches, but returns shader
+// uniform parameters instead of mutating pixels directly -- kept structurally
+// identical to that function on purpose so both paths produce matching results.
+function getFilterShaderParams(fx) {
+const p = { grayscale: false, mul: [1, 1, 1], add: [0, 0, 0], noise: false };
+if (fx === 'b&w' || fx === 'mono' || fx === 'pencil-shading-sketch') { p.grayscale = true; }
+else if (fx === 'retro' || fx === 'classic' || fx === 'retro-cam-matrix' || fx === 'vhs-tape-line') { p.mul = [0.9, 0.82, 0.62]; }
+else if (fx === 'daily' || fx === 'fresh' || fx === 'spring' || fx === 'summer') { p.mul = [1.06, 1.03, 0.94]; }
+else if (fx === 'cream' || fx === 'cozy' || fx === 'warm' || fx === 'autumn' || fx === 'bakery') { p.mul = [1.12, 1.0, 0.82]; }
+else if (fx === 'cool' || fx === 'winter' || fx === 'forest') { p.mul = [0.9, 1.02, 1.15]; }
+else if (fx === 'sparkle' || fx === 'neon-filter' || fx === 'viral-glow' || fx === 'cinematic-lut' || fx === 'neon-color-pulse') { p.mul = [1.1, 0.95, 1.2]; p.add = [8, 0, 8]; }
+else if (fx === 'french' || fx === 'cinema' || fx === 'indie') { p.mul = [0.95, 0.97, 1.05]; }
+else if (fx === 'digital-noise' || fx === 'shake-frame') { p.noise = true; }
+else {
+let hash = 0; for (let c = 0; c < fx.length; c++) hash = (hash * 31 + fx.charCodeAt(c)) % 360;
+const t = hash / 360;
+p.add = [(t - 0.5) * 40, 0, (0.5 - t) * 40];
+}
+return p;
+}
+
+// Renders one frame through the GPU shader into glCanvas. Returns true on
+// success (caller then copies glCanvas into downsampleBufferCanvas), or false
+// if WebGL isn't available/failed, so the caller can use the CPU path instead.
+function renderFilterPipelineWebGL(videoElement, cropNorm, targetW, targetH) {
+if (!glSupported) return false;
+try {
+glCanvas.width = targetW; glCanvas.height = targetH;
+gl.viewport(0, 0, targetW, targetH);
+gl.useProgram(glProgram);
+
+gl.activeTexture(gl.TEXTURE0);
+gl.bindTexture(gl.TEXTURE_2D, glVideoTexture);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, videoElement);
+gl.uniform1i(glUniforms.videoTexture, 0);
+
+const aiEnabled = !!(aiBgRemovalActive && aiBgLastMaskData && aiBgLastMaskWidth && aiBgLastMaskHeight);
+gl.activeTexture(gl.TEXTURE1);
+gl.bindTexture(gl.TEXTURE_2D, glMaskTexture);
+if (aiEnabled) {
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, aiBgLastMaskWidth, aiBgLastMaskHeight, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, new Uint8Array(aiBgLastMaskData));
+}
+gl.uniform1i(glUniforms.maskTexture, 1);
+
+gl.bindBuffer(gl.ARRAY_BUFFER, glPositionBuffer);
+gl.enableVertexAttribArray(glUniforms.position);
+gl.vertexAttribPointer(glUniforms.position, 2, gl.FLOAT, false, 0, 0);
+
+gl.uniform4f(glUniforms.cropRect, cropNorm.x, cropNorm.y, cropNorm.w, cropNorm.h);
+gl.uniform1i(glUniforms.mosaicEnabled, mosaicActive ? 1 : 0);
+gl.uniform1f(glUniforms.mosaicBlocks, 48.0);
+
+gl.uniform1i(glUniforms.chromaKeyEnabled, chromaKeyAlphaActive ? 1 : 0);
+if (chromaKeyAlphaActive) {
+const hex = document.getElementById('chromaKeyColorPicker').value;
+gl.uniform3f(glUniforms.chromaKeyColor, parseInt(hex.substr(1, 2), 16), parseInt(hex.substr(3, 2), 16), parseInt(hex.substr(5, 2), 16));
+gl.uniform1f(glUniforms.chromaKeyThreshold, parseFloat(document.getElementById('chromaKeyThreshold').value));
+}
+gl.uniform1i(glUniforms.aiMaskEnabled, aiEnabled ? 1 : 0);
+
+const fp = currentActiveFilterLutToken !== 'none' ? getFilterShaderParams(currentActiveFilterLutToken) : { grayscale: false, mul: [1, 1, 1], add: [0, 0, 0], noise: false };
+gl.uniform1i(glUniforms.grayscale, fp.grayscale ? 1 : 0);
+gl.uniform3f(glUniforms.colorMul, fp.mul[0], fp.mul[1], fp.mul[2]);
+gl.uniform3f(glUniforms.colorAdd, fp.add[0], fp.add[1], fp.add[2]);
+gl.uniform1i(glUniforms.noiseEnabled, fp.noise ? 1 : 0);
+gl.uniform1f(glUniforms.noiseSeed, (performance.now() % 1000) + 1.0);
+
+gl.disable(gl.BLEND);
+gl.clearColor(0, 0, 0, 0);
+gl.clear(gl.COLOR_BUFFER_BIT);
+gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+return true;
+} catch (e) {
+console.warn('WebGL render failed, disabling GPU path and falling back to CPU for the rest of this session:', e.message);
+glSupported = false;
+return false;
+}
+}
+
+function applyChromaKeyToBuffer() {
+try {
+const hex = document.getElementById('chromaKeyColorPicker').value;
+const threshold = parseFloat(document.getElementById('chromaKeyThreshold').value);
+const kr = parseInt(hex.substr(1, 2), 16), kg = parseInt(hex.substr(3, 2), 16), kb = parseInt(hex.substr(5, 2), 16);
+const frame = downsampleBufferCtx.getImageData(0, 0, downsampleBufferCanvas.width, downsampleBufferCanvas.height);
+const px = frame.data;
+for (let i = 0; i < px.length; i += 4) {
+const dr = px[i] - kr, dg = px[i + 1] - kg, db = px[i + 2] - kb;
+const dist = Math.sqrt(dr * dr + dg * dg + db * db);
+if (dist < threshold) px[i + 3] = 0;
+else if (dist < threshold * 1.6) px[i + 3] = Math.round(255 * ((dist - threshold) / (threshold * 0.6)));
+}
+downsampleBufferCtx.putImageData(frame, 0, 0);
+} catch (err) {}
+}
+
+function applyAiMaskToBuffer() {
+try {
+const frame = downsampleBufferCtx.getImageData(0, 0, downsampleBufferCanvas.width, downsampleBufferCanvas.height);
+const px = frame.data;
+const mask = aiBgLastMaskData;
+if (mask && mask.length === px.length / 4) {
+for (let i = 0, m = 0; i < px.length; i += 4, m++) { if (mask[m] === 0) px[i + 3] = 0; }
+downsampleBufferCtx.putImageData(frame, 0, 0);
+}
+} catch (err) {}
+}
+
+// --- Transition rendering (Hard Cut / Fade In / Fade Out / Wash Out /
+// Cross Dissolve / Ripple Dissolve / Jump Cut / Cutaway / Iris In / Iris Out) --
+function renderTransitionBlend(mode, progress, baseAlpha, cutawayEl) {
+const w = mainRenderCanvas.width, h = mainRenderCanvas.height, cx = w / 2, cy = h / 2;
+const outBuf = downsampleBufferCanvas, inBuf = transitionIncomingBufferCanvas;
+const ctx = canvasGraphicContext;
+
+if (mode === 'fadein') {
+if (progress < 0.5) { ctx.globalAlpha = baseAlpha; ctx.drawImage(outBuf, 0, 0, w, h); }
+else { ctx.globalAlpha = baseAlpha * ((progress - 0.5) * 2); ctx.drawImage(inBuf, 0, 0, w, h); }
+} else if (mode === 'fadeout') {
+if (progress < 0.5) { ctx.globalAlpha = baseAlpha * (1 - progress * 2); ctx.drawImage(outBuf, 0, 0, w, h); }
+else { ctx.globalAlpha = baseAlpha; ctx.drawImage(inBuf, 0, 0, w, h); }
+} else if (mode === 'washout') {
+if (progress < 0.5) {
+const p = progress * 2;
+ctx.globalAlpha = baseAlpha * (1 - p); ctx.drawImage(outBuf, 0, 0, w, h);
+ctx.globalAlpha = baseAlpha * p; ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
+} else {
+const p = (progress - 0.5) * 2;
+ctx.globalAlpha = baseAlpha; ctx.drawImage(inBuf, 0, 0, w, h);
+ctx.globalAlpha = baseAlpha * (1 - p); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
+}
+} else if (mode === 'cross') {
+ctx.globalAlpha = baseAlpha * (1 - progress); ctx.drawImage(outBuf, 0, 0, w, h);
+ctx.globalAlpha = baseAlpha * progress; ctx.drawImage(inBuf, 0, 0, w, h);
+} else if (mode === 'rippledissolve') {
+const strips = 40, stripH = h / strips, amplitude = 30 * Math.sin(progress * Math.PI);
+for (let i = 0; i < strips; i++) {
+const y = i * stripH;
+const wave = Math.sin((i / strips) * Math.PI * 4 + progress * Math.PI * 2) * amplitude;
+ctx.globalAlpha = baseAlpha * (1 - progress);
+ctx.drawImage(outBuf, 0, y, w, stripH, wave, y, w, stripH);
+ctx.globalAlpha = baseAlpha * progress;
+ctx.drawImage(inBuf, 0, y, w, stripH, -wave, y, w, stripH);
+}
+} else if (mode === 'jumpcut') {
+const punch = (progress > 0.42 && progress < 0.58) ? 1.06 : 1.0;
+ctx.save();
+ctx.translate(cx, cy); ctx.scale(punch, punch); ctx.translate(-cx, -cy);
+ctx.globalAlpha = baseAlpha;
+ctx.drawImage(progress < 0.5 ? outBuf : inBuf, 0, 0, w, h);
+ctx.restore();
+} else if (mode === 'cutaway') {
+if (progress < 0.33) { ctx.globalAlpha = baseAlpha; ctx.drawImage(outBuf, 0, 0, w, h); }
+else if (progress < 0.66) {
+ctx.globalAlpha = baseAlpha;
+if (cutawayEl) { ctx.drawImage(cutawayEl, 0, 0, w, h); }
+else {
+ctx.drawImage(outBuf, 0, 0, w, h);
+ctx.globalAlpha = baseAlpha * 0.3; ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
+}
+} else { ctx.globalAlpha = baseAlpha; ctx.drawImage(inBuf, 0, 0, w, h); }
+} else if (mode === 'irisin') {
+ctx.globalAlpha = baseAlpha; ctx.drawImage(outBuf, 0, 0, w, h);
+const r = (Math.hypot(w, h) / 2) * progress;
+ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.clip();
+ctx.drawImage(inBuf, 0, 0, w, h); ctx.restore();
+} else if (mode === 'irisout') {
+ctx.globalAlpha = baseAlpha; ctx.drawImage(inBuf, 0, 0, w, h);
+const r = (Math.hypot(w, h) / 2) * (1 - progress);
+ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.clip();
+ctx.drawImage(outBuf, 0, 0, w, h); ctx.restore();
+} else {
+ctx.globalAlpha = baseAlpha; ctx.drawImage(progress < 0.5 ? outBuf : inBuf, 0, 0, w, h);
+}
+ctx.globalAlpha = baseAlpha;
+}
+
+// Pixel-level color grading. The original only handled 3 of the ~50 filter
+// names in filtersAndEffectsDatabase -- every other filter chip silently did
+// nothing when clicked. This maps every category to a real color adjustment.
+function applyColorFilterToBuffer(fx) {
+try {
+let frameBufferData = downsampleBufferCtx.getImageData(0, 0, downsampleBufferCanvas.width, downsampleBufferCanvas.height);
+let pixels = frameBufferData.data;
+for (let i = 0; i < pixels.length; i += 4) {
+let r = pixels[i], g = pixels[i + 1], b = pixels[i + 2];
+if (fx === 'b&w' || fx === 'mono' || fx === 'pencil-shading-sketch') {
+let v = (0.2126 * r) + (0.7152 * g) + (0.0722 * b);
+r = g = b = v;
+} else if (fx === 'retro' || fx === 'classic' || fx === 'retro-cam-matrix' || fx === 'vhs-tape-line') {
+r *= 0.9; g *= 0.82; b *= 0.62;
+} else if (fx === 'daily' || fx === 'fresh' || fx === 'spring' || fx === 'summer') {
+r *= 1.06; g *= 1.03; b *= 0.94;
+} else if (fx === 'cream' || fx === 'cozy' || fx === 'warm' || fx === 'autumn' || fx === 'bakery') {
+r *= 1.12; g *= 1.0; b *= 0.82;
+} else if (fx === 'cool' || fx === 'winter' || fx === 'forest') {
+r *= 0.9; g *= 1.02; b *= 1.15;
+} else if (fx === 'sparkle' || fx === 'neon-filter' || fx === 'viral-glow' || fx === 'cinematic-lut' || fx === 'neon-color-pulse') {
+r = r * 1.1 + 8; g = g * 0.95; b = b * 1.2 + 8;
+} else if (fx === 'french' || fx === 'cinema' || fx === 'indie') {
+r *= 0.95; g *= 0.97; b *= 1.05;
+} else if (fx === 'digital-noise' || fx === 'shake-frame') {
+const n = (Math.random() - 0.5) * 40;
+r += n; g += n; b += n;
+} else {
+// Any other named LUT (party/lens/anime/distortion chips etc.) gets
+// a mild deterministic tint derived from its own name so every chip
+// in the panel visibly does *something* rather than nothing.
+let hash = 0; for (let c = 0; c < fx.length; c++) hash = (hash * 31 + fx.charCodeAt(c)) % 360;
+const t = hash / 360;
+r += (t - 0.5) * 40; b += (0.5 - t) * 40;
+}
+pixels[i] = Math.max(0, Math.min(255, r));
+pixels[i + 1] = Math.max(0, Math.min(255, g));
+pixels[i + 2] = Math.max(0, Math.min(255, b));
+}
+downsampleBufferCtx.putImageData(frameBufferData, 0, 0);
+} catch (err) {}
+}
+
+function applyMosaicToBuffer(blockSize) {
+try {
+const w = downsampleBufferCanvas.width, h = downsampleBufferCanvas.height;
+for (let y = 0; y < h; y += blockSize) {
+for (let x = 0; x < w; x += blockSize) {
+const bw = Math.min(blockSize, w - x), bh = Math.min(blockSize, h - y);
+const sample = downsampleBufferCtx.getImageData(x, y, 1, 1).data;
+downsampleBufferCtx.fillStyle = `rgb(${sample[0]},${sample[1]},${sample[2]})`;
+downsampleBufferCtx.fillRect(x, y, bw, bh);
+}
+}
+} catch (err) {}
+}
+
+function executeBackgroundAudioProcessing() {
+if (!playbackEngineRunning || isCurrentlyHoverSkimming) {
+AUDIO_TRACK_KEYS.forEach(key => tracksRegistryMap[key].forEach(audioClip => { if (audioClip.element) audioClip.element.pause(); }));
+return;
+}
+const timeContext = currentTimeOffsetSeconds;
+AUDIO_TRACK_KEYS.forEach(key => tracksRegistryMap[key].forEach(audioClip => {
+if (timeContext >= audioClip.timelineStartOffset && timeContext <= (audioClip.timelineStartOffset + audioClip.duration)) {
+const targetAudioTime = (timeContext - audioClip.timelineStartOffset) + audioClip.sourceStartOffset;
+if (audioClip.element && Math.abs(audioClip.element.currentTime - targetAudioTime) > 0.3) audioClip.element.currentTime = targetAudioTime;
+ensureClipTransformDefaults(audioClip);
+if (audioClip.element) audioClip.element.volume = Math.max(0, Math.min(1, getClipPropertyValueAtTime(audioClip, 'volume', 'volumeValue', timeContext) / 100));
+if (audioClip.element && audioClip.element.paused) audioClip.element.play().catch(() => {});
+} else { if (audioClip.element) audioClip.element.pause(); }
+}));
+}
+
+function globalEngineMasterFrameLoop(timestamp) {
+if (playbackEngineRunning && !isCurrentlyHoverSkimming) {
+if (!lastTimestampHardwareClock) lastTimestampHardwareClock = timestamp;
+currentTimeOffsetSeconds += ((timestamp - lastTimestampHardwareClock) / 1000) * (masterSlowMoActiveToggle ? 0.5 : currentTimeWarpVelocity);
+if (currentTimeOffsetSeconds >= timelineDurationBoundsSeconds) { stopPlayback(); currentTimeOffsetSeconds = timelineDurationBoundsSeconds; }
+}
+lastTimestampHardwareClock = timestamp;
+executeCompositingDrawingSequence();
+executeBackgroundAudioProcessing();
+updateTimelineUIMetrics();
+requestAnimationFrame(globalEngineMasterFrameLoop);
+}
+requestAnimationFrame(globalEngineMasterFrameLoop);
+
+function updateTimelineUIMetrics() {
+const activeDisplayContext = isCurrentlyHoverSkimming ? hoverSkimTimeTargetSeconds : currentTimeOffsetSeconds;
+timerDigitalDisplay.innerText = formatTimeLayout(activeDisplayContext);
+if (timelineDurationBoundsSeconds > 0) {
+const percentageFill = (currentTimeOffsetSeconds / timelineDurationBoundsSeconds) * 100;
+timelinePlayheadLine.style.left = `${percentageFill}%`;
+miniScrubberFillBar.style.width = `${percentageFill}%`;
+}
+refreshTransformPanelForSelectedClip();
+}
+
+function togglePlayback() { if (playbackEngineRunning) pausePlaybackSession(); else initiatePlaybackSession(); }
+function initiatePlaybackSession() { playbackEngineRunning = true; lastTimestampHardwareClock = performance.now(); }
+function pausePlaybackSession() { playbackEngineRunning = false; Object.keys(tracksRegistryMap).forEach(k => tracksRegistryMap[k].forEach(c => { if(c.element) c.element.pause(); })); }
+function stopPlayback() { pausePlaybackSession(); currentTimeOffsetSeconds = 0; Object.keys(tracksRegistryMap).forEach(k => tracksRegistryMap[k].forEach(c => { if(c.element) c.element.currentTime = c.sourceStartOffset; })); updateTimelineUIMetrics(); }
+// Originally "Delete" called location.reload(), which wiped the entire
+// project (every imported clip, edit, and effect) with no confirmation --
+// instead of deleting just the selected clip as the label implies.
+function flushActiveWorkspace() {
+if (!activeSelectedClipObject) {
+showNotificationAlert("Select a clip on the timeline first!");
+return;
+}
+const clip = activeSelectedClipObject;
+pushHistorySnapshot();
+Object.keys(tracksRegistryMap).forEach(trackKey => {
+tracksRegistryMap[trackKey] = tracksRegistryMap[trackKey].filter(c => c.id !== clip.id);
+});
+// Element is intentionally left in the hidden cache (not removed from the
+// DOM) so Undo can restore this clip and still have a working element to
+// reattach via elementRegistry.
+activeSelectedClipObject = null;
+rebuildVisualTrackLayoutLanes();
+executeCompositingDrawingSequence();
+refreshTransformPanelForSelectedClip();
+showNotificationAlert(`Deleted "${clip.name}"`);
+}
+
+function resetEntireProject() {
+if (confirm("This clears every clip and edit in the project. Continue?")) location.reload();
+}
+
+// "Save As" previously just called showNotificationAlert() and produced no
+// actual file -- there was no export path in the entire app. This records the
+// live canvas render plus every audio/video element's audio into a real
+// downloadable .webm by playing the timeline through once in real time.
+//
+// Exports at 3840x2160 (4K) with a high bitrate. Important honesty note: this
+// only delivers genuine 4K *detail* if your source footage is actually that
+// high-resolution to begin with -- exporting a 720p clip at 4K just upscales
+// it into a bigger file, the same way it would in any editor. A warning is
+// shown if your footage is well below 4K so that isn't a surprise.
+//
+// Also fixes a real bug: this used to call resizeInternalBuffers() with no
+// argument, which silently re-applied the live-preview 1280px cap even after
+// setting the canvas to 3840x2160 -- so the "4K export" was actually only ever
+// processing at ~1280x720 and stretching that up to fill the 4K frame. The
+// buffer is now genuinely raised to 4K for the duration of the export.
+let exportInProgress = false;
+function exportProjectAsVideo() {
+if (exportInProgress) return;
+if (tracksRegistryMap.video.length === 0) {
+showNotificationAlert("Add a video clip before exporting.");
+return;
+}
+if (!window.MediaRecorder) {
+showNotificationAlert("MediaRecorder isn't supported in this browser.");
+return;
+}
+
+const EXPORT_WIDTH = 3840, EXPORT_HEIGHT = 2160;
+const sourceMaxDim = Math.max(...tracksRegistryMap.video.map(c => Math.max(c.width || 0, c.height || 0)), 0);
+if (sourceMaxDim > 0 && sourceMaxDim < 1920) {
+showNotificationAlert(`Heads up: your footage is ~${sourceMaxDim}px -- exporting at 4K will upscale it, not add real detail.`);
+}
+
+exportInProgress = true;
+const exportBtn = document.getElementById('btn-export');
+exportBtn.innerText = "Exporting 4K…";
+exportBtn.disabled = true;
+
+const prevWidth = mainRenderCanvas.width;
+const prevHeight = mainRenderCanvas.height;
+mainRenderCanvas.width = EXPORT_WIDTH;
+mainRenderCanvas.height = EXPORT_HEIGHT;
+resizeInternalBuffers(EXPORT_WIDTH); // genuinely process at 4K, not the 1280px preview cap
+
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const destination = audioCtx.createMediaStreamDestination();
+[...tracksRegistryMap.video, ...tracksRegistryMap.audio, ...tracksRegistryMap.music2].forEach(clip => {
+if (!clip.element || clip._audioSourceNode) return;
+try {
+const src = audioCtx.createMediaElementSource(clip.element);
+if (denoiseActive) {
+// Real highpass filter -- genuinely attenuates everything below
+// ~150Hz (typical hum/rumble range) in the exported audio.
+const highpass = audioCtx.createBiquadFilter();
+highpass.type = 'highpass';
+highpass.frequency.value = 150;
+src.connect(highpass);
+highpass.connect(destination);
+highpass.connect(audioCtx.destination);
+} else {
+src.connect(destination);
+src.connect(audioCtx.destination);
+}
+clip._audioSourceNode = src;
+} catch (e) { /* element already connected elsewhere */ }
+});
+
+const canvasStream = mainRenderCanvas.captureStream(60);
+const combinedStream = new MediaStream([
+...canvasStream.getVideoTracks(),
+...destination.stream.getAudioTracks()
+]);
+
+const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus') ? 'video/webm;codecs=vp9,opus' : 'video/webm';
+const recorder = new MediaRecorder(combinedStream, {
+mimeType,
+videoBitsPerSecond: 25000000,
+audioBitsPerSecond: 192000
+});
+const chunks = [];
+recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+recorder.onstop = () => {
+const blob = new Blob(chunks, { type: 'video/webm' });
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url; a.download = `CutLoom-4k-export-${Date.now()}.webm`;
+document.body.appendChild(a); a.click(); document.body.removeChild(a);
+setTimeout(() => URL.revokeObjectURL(url), 2000);
+
+// Restore live-preview canvas size and the normal 1280px buffer cap.
+mainRenderCanvas.width = prevWidth;
+mainRenderCanvas.height = prevHeight;
+resizeInternalBuffers();
+
+exportInProgress = false;
+exportBtn.innerText = "Export Video";
+exportBtn.disabled = false;
+showNotificationAlert("4K export complete — download started.");
+};
+
+stopPlayback();
+currentTimeOffsetSeconds = 0;
+recorder.start();
+initiatePlaybackSession();
+showNotificationAlert("Rendering & exporting in 4K…");
+
+const checkDone = setInterval(() => {
+if (currentTimeOffsetSeconds >= timelineDurationBoundsSeconds - 0.05 || !playbackEngineRunning && currentTimeOffsetSeconds > 0) {
+clearInterval(checkDone);
+recorder.stop();
+pausePlaybackSession();
+}
+}, 200);
+}
+
+// --- AI (ML-based) background removal ---------------------------------------
+// Real client-side segmentation via TensorFlow.js + BodyPix, loaded on demand
+// from a CDN. This works on arbitrary footage (not just green screen), but
+// needs an internet connection the first time to fetch the library + model
+// weights (a few MB), and it will not run at all if that fetch is blocked --
+// e.g. by a sandboxed preview with no outbound network access. Open the file
+// in a normal browser with internet access to use this feature.
+let aiSegmentationNet = null;
+let aiBgRemovalActive = false;
+let aiBgLastMaskData = null;
+let aiBgProcessing = false;
+const AI_BG_SEGMENT_INTERVAL_MS = 250; // segmentation is too slow to run every render frame
+
+function loadAiSegmentationModel() {
+const statusEl = document.getElementById('aiBgStatusLine');
+const loadBtn = document.getElementById('btn-ai-bg-load');
+if (aiSegmentationNet) { statusEl.innerText = "Model already loaded."; return; }
+statusEl.innerText = "Loading TensorFlow.js + BodyPix from CDN... (needs internet)";
+loadBtn.disabled = true;
+
+function loadScript(src) {
+return new Promise((resolve, reject) => {
+const s = document.createElement('script');
+s.src = src; s.onload = resolve; s.onerror = () => reject(new Error('could not fetch ' + src));
+document.head.appendChild(s);
+});
+}
+
+loadScript('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js')
+.then(() => loadScript('https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@2.2.0/dist/body-pix.min.js'))
+.then(() => {
+statusEl.innerText = "Downloading segmentation model weights...";
+return bodyPix.load({ architecture: 'MobileNetV1', outputStride: 16, multiplier: 0.75, quantBytes: 2 });
+})
+.then(net => {
+aiSegmentationNet = net;
+statusEl.innerText = "AI model ready. Click Enable to use it on the current video.";
+loadBtn.disabled = false;
+loadBtn.innerText = "Model Loaded";
+document.getElementById('btn-ai-bg-toggle').disabled = false;
+})
+.catch(err => {
+statusEl.innerText = "Couldn't load the AI model -- this needs an internet connection reachable from this page. (" + err.message + ")";
+loadBtn.disabled = false;
+});
+}
+
+function toggleAiBackgroundRemoval() {
+if (!aiSegmentationNet) { showNotificationAlert("Load the AI model first."); return; }
+aiBgRemovalActive = !aiBgRemovalActive;
+const btn = document.getElementById('btn-ai-bg-toggle');
+btn.innerText = aiBgRemovalActive ? "Disable" : "Enable";
+btn.classList.toggle('active-tool', aiBgRemovalActive);
+if (!aiBgRemovalActive) aiBgLastMaskData = null;
+showNotificationAlert(aiBgRemovalActive ? "AI background removal on" : "AI background removal off");
+executeCompositingDrawingSequence();
+}
+
+// Runs continuously in the background (throttled) while aiBgRemovalActive,
+// computing a fresh segmentation mask off the primary video's current frame.
+// The mask is reused across several render frames since segmentation itself is
+// too slow (~100-400ms) to run every frame -- expect it to lag slightly behind
+// fast motion rather than be pixel-perfect in real time.
+async function runAiSegmentationLoop() {
+while (true) {
+if (aiBgRemovalActive && aiSegmentationNet && !aiBgProcessing) {
+const t = isCurrentlyHoverSkimming ? hoverSkimTimeTargetSeconds : currentTimeOffsetSeconds;
+const primary = tracksRegistryMap.video.find(c => t >= c.timelineStartOffset && t <= c.timelineStartOffset + c.duration);
+if (primary && primary.element && primary.element.readyState >= 2) {
+aiBgProcessing = true;
+try {
+const segmentation = await aiSegmentationNet.segmentPerson(primary.element, { internalResolution: 'low', segmentationThreshold: 0.65 });
+aiBgLastMaskData = resampleMaskToBuffer(segmentation, downsampleBufferCanvas.width, downsampleBufferCanvas.height);
+aiBgLastMaskWidth = downsampleBufferCanvas.width;
+aiBgLastMaskHeight = downsampleBufferCanvas.height;
+} catch (e) { /* keep the previous mask if this frame's segmentation failed */ }
+aiBgProcessing = false;
+}
+}
+await new Promise(r => setTimeout(r, AI_BG_SEGMENT_INTERVAL_MS));
+}
+}
+runAiSegmentationLoop();
+
+function resampleMaskToBuffer(segmentation, targetW, targetH) {
+const srcW = segmentation.width, srcH = segmentation.height, srcData = segmentation.data;
+const out = new Uint8Array(targetW * targetH);
+for (let y = 0; y < targetH; y++) {
+const sy = Math.floor((y / targetH) * srcH);
+for (let x = 0; x < targetW; x++) {
+out[y * targetW + x] = srcData[sy * srcW + Math.floor((x / targetW) * srcW)];
+}
+}
+return out;
+}
+
+// --- Undo / Redo ---------------------------------------------------------
+// Snapshot-based: each snapshot is a plain-JSON copy of every track's clips
+// (DOM elements stripped out, since they can't be cloned) plus the relevant
+// global state. Restoring re-attaches each clip's real element by id via
+// elementRegistry, which is populated whenever a clip is created.
+function cloneClipForHistory(clip) {
+const { element, sourceFile, ...rest } = clip;
+return JSON.parse(JSON.stringify(rest));
+}
+
+function captureCurrentState() {
+return {
+tracks: {
+video: tracksRegistryMap.video.map(cloneClipForHistory),
+pip: tracksRegistryMap.pip.map(cloneClipForHistory),
+audio: tracksRegistryMap.audio.map(cloneClipForHistory),
+text: tracksRegistryMap.text.map(cloneClipForHistory),
+music2: tracksRegistryMap.music2.map(cloneClipForHistory)
+},
+timelineDurationBoundsSeconds,
+activeTransitionMode,
+currentActiveFilterLutToken,
+globalClipIdIncrementer
+};
+}
+
+function pushHistorySnapshot() {
+undoStack.push(captureCurrentState());
+if (undoStack.length > MAX_HISTORY_STATES) undoStack.shift();
+redoStack = [];
+updateUndoRedoButtons();
+}
+
+function restoreState(snapshot) {
+['video', 'pip', 'audio', 'text', 'music2'].forEach(key => {
+tracksRegistryMap[key] = snapshot.tracks[key].map(data => {
+const clip = JSON.parse(JSON.stringify(data));
+if (elementRegistry[clip.id]) clip.element = elementRegistry[clip.id];
+if (fileRegistry[clip.id]) clip.sourceFile = fileRegistry[clip.id];
+return clip;
+});
+});
+timelineDurationBoundsSeconds = snapshot.timelineDurationBoundsSeconds;
+activeTransitionMode = snapshot.activeTransitionMode;
+currentActiveFilterLutToken = snapshot.currentActiveFilterLutToken;
+globalClipIdIncrementer = snapshot.globalClipIdIncrementer;
+activeSelectedClipObject = null;
+totalDurationLabel.innerText = formatTimeLayout(timelineDurationBoundsSeconds);
+rebuildVisualTrackLayoutLanes();
+drawCleanSecondsTicksRuler();
+refreshTransformPanelForSelectedClip();
+executeCompositingDrawingSequence();
+}
+
+function performUndo() {
+if (undoStack.length === 0) { showNotificationAlert("Nothing to undo."); return; }
+redoStack.push(captureCurrentState());
+restoreState(undoStack.pop());
+updateUndoRedoButtons();
+showNotificationAlert("Undid last change");
+}
+
+function performRedo() {
+if (redoStack.length === 0) { showNotificationAlert("Nothing to redo."); return; }
+undoStack.push(captureCurrentState());
+restoreState(redoStack.pop());
+updateUndoRedoButtons();
+showNotificationAlert("Redid change");
+}
+
+function updateUndoRedoButtons() {
+const u = document.getElementById('btn-undo'), r = document.getElementById('btn-redo');
+if (u) u.disabled = undoStack.length === 0;
+if (r) r.disabled = redoStack.length === 0;
+}
+
+document.addEventListener('keydown', (e) => {
+const tag = (document.activeElement && document.activeElement.tagName) || '';
+if (tag === 'INPUT' || tag === 'TEXTAREA') return; // don't hijack typing in fields
+if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z') { e.preventDefault(); performUndo(); }
+else if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'y' || (e.shiftKey && e.key.toLowerCase() === 'z'))) { e.preventDefault(); performRedo(); }
+});
+
+// --- Project Save / Load (IndexedDB) --------------------------------------
+// Stores the real media Blobs (video/audio/image files) alongside the edit
+// metadata, so reloading the page can fully rebuild the project -- not just
+// the settings, but the actual footage too, without re-uploading it.
+const IDB_NAME = 'volt_studio_db', IDB_STORE = 'projects';
+
+function openProjectDB() {
+return new Promise((resolve, reject) => {
+const req = indexedDB.open(IDB_NAME, 1);
+req.onupgradeneeded = () => { req.result.createObjectStore(IDB_STORE); };
+req.onsuccess = () => resolve(req.result);
+req.onerror = () => reject(req.error);
+});
+}
+
+async function saveProjectToBrowser() {
+try {
+const db = await openProjectDB();
+const mediaBlobs = {};
+['video', 'pip', 'audio', 'music2'].forEach(key => {
+tracksRegistryMap[key].forEach(clip => { if (clip.sourceFile) mediaBlobs[clip.id] = clip.sourceFile; });
+});
+const record = { projectData: captureCurrentState(), mediaBlobs };
+const db_tx = db.transaction(IDB_STORE, 'readwrite');
+db_tx.objectStore(IDB_STORE).put(record, 'currentProject');
+await new Promise((res, rej) => { db_tx.oncomplete = res; db_tx.onerror = () => rej(db_tx.error); });
+showNotificationAlert("Project saved in this browser (IndexedDB) -- including the actual media files.");
+} catch (e) {
+showNotificationAlert("Save failed: " + e.message);
+}
+}
+
+async function loadProjectFromBrowser() {
+try {
+const db = await openProjectDB();
+const tx = db.transaction(IDB_STORE, 'readonly');
+const req = tx.objectStore(IDB_STORE).get('currentProject');
+const record = await new Promise((res, rej) => { req.onsuccess = () => res(req.result); req.onerror = () => rej(req.error); });
+if (!record) { showNotificationAlert("No saved project found in this browser."); return; }
+
+elementRegistry = {};
+fileRegistry = {};
+['video', 'audio', 'music2'].forEach(key => {
+record.projectData.tracks[key].forEach(clipData => {
+const blob = record.mediaBlobs[clipData.id];
+if (!blob) return;
+const el = document.createElement(key === 'video' ? 'video' : 'audio');
+el.src = URL.createObjectURL(blob);
+if (key === 'video') { el.muted = true; el.setAttribute('playsinline', 'true'); }
+el.preload = 'auto';
+document.getElementById('hiddenHardwareVideoCacheCage').appendChild(el);
+elementRegistry[clipData.id] = el;
+fileRegistry[clipData.id] = blob;
+});
+});
+record.projectData.tracks.pip.forEach(clipData => {
+const blob = record.mediaBlobs[clipData.id];
+if (!blob) return;
+const img = document.createElement('img');
+img.src = URL.createObjectURL(blob);
+elementRegistry[clipData.id] = img;
+fileRegistry[clipData.id] = blob;
+});
+
+restoreState(record.projectData);
+// sourceFile is already reattached automatically by restoreState via
+// fileRegistry, and waveformPeaks (plain numbers) survives the JSON
+// round-trip on its own. This re-decode is just a safety net for the
+// edge case where Save happened before an async decode had finished.
+tracksRegistryMap.audio.forEach(c => {
+if (c.sourceFile && !c.waveformPeaks) decodeRealWaveformForClip(c, c.sourceFile);
+});
+undoStack = []; redoStack = []; updateUndoRedoButtons();
+showNotificationAlert("Project loaded from this browser.");
+} catch (e) {
+showNotificationAlert("Load failed: " + e.message);
+}
+}
+</script>
+
+<!-- ABOUT US MODAL -->
+<div id="aboutModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center;">
+<div style="background:#141414; color:#fff; padding:24px; border-radius:8px; max-width:500px; border:1px solid #333; font-family:sans-serif;">
+<h2 style="color:#ffbc00; margin-top:0;">About CutLoom Studio</h2>
+<p>CutLoom is a high-performance, web-based video editing suite built with HTML5, WebGL, and JavaScript.</p>
+<p>Designed for fast in-browser video processing, CutLoom allows users to trim clips, apply filters, and render video content directly on their local device without requiring software downloads or backend server uploads.</p>
+<button onclick="closeModal('aboutModal')" style="background:#ffbc00; border:none; padding:8px 16px; font-weight:bold; cursor:pointer; border-radius:4px;">Close</button>
+</div>
+</div>
+
+<!-- PRIVACY POLICY MODAL (REQUIRED FOR ADSENSE) -->
+<div id="privacyModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center;">
+<div style="background:#141414; color:#fff; padding:24px; border-radius:8px; max-width:550px; border:1px solid #333; font-family:sans-serif; max-height:80vh; overflow-y:auto;">
+<h2 style="color:#ffbc00; margin-top:0;">Privacy Policy</h2>
+<p>At CutLoom, we prioritize your privacy. All video processing and rendering occur locally in your web browser. We do not store or upload your personal media files to external servers.</p>
+<h3 style="color:#ccc;">Third-Party Advertising & Cookies</h3>
+<p>CutLoom uses Google AdSense to serve advertisements. Google and other third-party ad networks use cookies to serve ads based on your visit to this site and other websites on the internet.</p>
+<p>Users may opt out of personalized advertising by visiting <a href="https://www.google.com/settings/ads" target="_blank" style="color:#ffbc00;">Google Ad Settings</a>.</p>
+<button onclick="closeModal('privacyModal')" style="background:#ffbc00; border:none; padding:8px 16px; font-weight:bold; cursor:pointer; border-radius:4px;">Close</button>
+</div>
+</div>
+
+<!-- MODAL CONTROLLER SCRIPT -->
+<script>
+window.openModal = function(id) {
+var el = document.getElementById(id);
+if (el) el.style.display = 'flex';
+};
+window.closeModal = function(id) {
+var el = document.getElementById(id);
+if (el) el.style.display = 'none';
+};
+function launchStudio() {
+const landingPage = document.getElementById('home-landing-page');
+if (landingPage) {
+landingPage.classList.add('hidden-landing');
+}
+}
+</script>
+</body>
+</html>
