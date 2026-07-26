@@ -2559,11 +2559,18 @@ const chunks = [];
 recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
 recorder.onstop = () => {
 const blob = new Blob(chunks, { type: 'video/webm' });
+chunks.length = 0; // Clears memory immediately!
 const url = URL.createObjectURL(blob);
 const a = document.createElement('a');
-a.href = url; a.download = `CutLoom-4k-export-${Date.now()}.webm`;
-document.body.appendChild(a); a.click(); document.body.removeChild(a);
-setTimeout(() => URL.revokeObjectURL(url), 2000);
+a.href = url;
+a.download = `CutLoom-4k-export-${Date.now()}.webm`;
+document.body.appendChild(a);
+a.click();
+document.body.removeChild(a);
+setTimeout(() => {
+URL.revokeObjectURL(url);
+}, 500);
+};
 
 // Restore live-preview canvas size and the normal 1280px buffer cap.
 mainRenderCanvas.width = prevWidth;
